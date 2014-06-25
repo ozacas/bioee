@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -91,30 +90,25 @@ public class MSConvertJob extends JobMessageType {
 	 */
 	private void saveData(final ProteowizardJob job) {
 		final List<String> urls = this.getInputData().getUrl();
-		job.getDataFile().forEach(new Consumer<DataFileType>() {
-
-			@Override
-			public void accept(DataFileType t) {
-				FileOutputStream os = null;
-				try {
-					File f = File.createTempFile("msconvert_input_data", "file.raw", getDataFolder());
-					setDataFolder(f.getParentFile());
-					os = new FileOutputStream(f);
-					t.getData().writeTo(os);
-					urls.add(f.toURI().toURL().toExternalForm());
-				} catch (IOException e) {
-					e.printStackTrace();
-				} finally {
-					if (os != null) {
-						try {
-							os.close();
-						} catch (IOException e) {
-						}
+		for (DataFileType dft : job.getDataFile()) {
+			FileOutputStream os = null;
+			try {
+				File f = File.createTempFile("msconvert_input_data", "file.raw", getDataFolder());
+				setDataFolder(f.getParentFile());
+				os = new FileOutputStream(f);
+				dft.getData().writeTo(os);
+				urls.add(f.toURI().toURL().toExternalForm());
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (os != null) {
+					try {
+						os.close();
+					} catch (IOException e) {
 					}
 				}
 			}
-			
-		});
+		}
 		job.getDataFile().clear();
 	}
 	

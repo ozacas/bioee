@@ -16,7 +16,6 @@ import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
-import javax.ejb.Stateless;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -31,16 +30,15 @@ import org.apache.geronimo.mail.util.StringBufferOutputStream;
  * @author acassin
  *
  */
-@Stateless
 @Singleton
 @Lock(LockType.READ)
 public class MSConvertConfig {
 	// resources provided by TomEE
-	@Resource(name="MSCONVERT_PATH")
+	@Resource(mappedName="MSCONVERT_PATH")
 	private String msconvert_path;
-	@Resource(name="MSCONVERT_TEMP_FOLDER")
+	@Resource(mappedName="MSCONVERT_TEMP_FOLDER")
 	private String temp_data_folder;
-	@Resource(name="MSCONVERT_USAGE")
+	@Resource(mappedName="MSCONVERT_USAGE")
 	private String msconvert_usage;
 	
 	// fields
