@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/JobMessage" xmlns:tns="http://www.example.org/JobMessage" elementFormDefault="qualified">
+
+
+
+
+    <element name="JobMessage" type="tns:JobMessageType"></element>
+    
+    <complexType name="JobMessageType">
+    	<sequence>
+    		<element name="jobID" type="string"></element>
+    		<element name="inputData" type="tns:inputDataType"></element>
+    		<element name="inputParameters" type="anyURI">
+    			<annotation>
+    				<documentation>Typically a file url used to obtain the XML job parameters. Required.</documentation>
+    			</annotation></element>
+    		<element name="results" type="tns:resultsType"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="inputDataType">
+    	<sequence>
+    		<element name="url" type="string" minOccurs="0"
+    			maxOccurs="unbounded">
+    		</element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="resultsType">
+    	<sequence>
+    		<element name="status" type="string"></element>
+    		<element name="outputData" type="tns:outputDataType"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="outputDataType">
+    	<sequence>
+    		<element name="url" type="anyURI" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="FilesType">
+    	<sequence>
+    		<element name="file" type="string" minOccurs="1" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+</schema>

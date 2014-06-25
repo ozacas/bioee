@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/NewXMLSchema" 
+		xmlns:tns="http://www.example.org/NewXMLSchema" elementFormDefault="qualified"
+		xmlns:xmime="http://www.w3.org/2005/05/xmlmime">
+
+    <element name="ProteowizardJob" type="tns:ProteowizardJobType"></element>
+    
+    <complexType name="ProteowizardJobType">
+    	<sequence>
+    		<element name="DataFile" type="tns:DataFileType"
+    			minOccurs="1" maxOccurs="unbounded">
+    		</element>
+    		<element name="OutputFormat" minOccurs="1" maxOccurs="1">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="MGF"></enumeration>
+    					<enumeration value="MzML"></enumeration>
+    					<enumeration value="MzXML"></enumeration>
+    					<minLength value="3"></minLength>
+    					<maxLength value="20"></maxLength>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="FilterParameters"
+    			type="tns:FilterParametersType" minOccurs="0" maxOccurs="1">
+    		</element>
+    		<element name="Compression" type="tns:CompressionType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="PrecursorCorrection"
+    			type="tns:PrecursorCorrectionType" minOccurs="0" maxOccurs="1">
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="DataFileType">
+    	<sequence>
+    		<element name="order" type="int"></element>
+    		<element name="format" type="string"></element>
+    		<element name="suggestedName" type="string"></element>
+    		<element name="data" type="base64Binary" xmime:expectedContentTypes="application/octet-stream"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="FilterParametersType">
+    	<sequence>
+    		<element name="msLevelFilter" minOccurs="0" maxOccurs="3"
+    			type="tns:MsLevelType">
+    		</element>
+    		<element name="peakPicking" type="string"></element>
+            <element name="IntensityFilter" type="tns:ThresholdParametersType" minOccurs="0" maxOccurs="1">
+    		</element>
+            <element name="mzFilter" type="tns:mzFilteringType" minOccurs="0" maxOccurs="1">
+
+    		</element>
+            <element name="polarityFilter" minOccurs="0" maxOccurs="1">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="positive"></enumeration>
+    					<enumeration value="negative"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+            <element name="noiseFilter" type="tns:noiseFilteringType" minOccurs="0" maxOccurs="1">
+    		</element>
+            <element name="activationFilter" type="tns:activationFilteringType" minOccurs="0" maxOccurs="1">
+    		</element>
+            <element name="analyzerFilter" minOccurs="0" maxOccurs="1">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="quad"></enumeration>
+    					<enumeration value="orbi"></enumeration>
+    					<enumeration value="FT"></enumeration>
+    					<enumeration value="IT"></enumeration>
+    					<enumeration value="TOF"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+            <element name="deisotopeFilter" type="tns:deisotopeFilteringType" minOccurs="0" maxOccurs="1">
+    		</element>
+            <element name="etdFilter" type="tns:etdFilteringType" minOccurs="0" maxOccurs="1"></element>
+        </sequence>
+    </complexType>
+
+    <complexType name="MsLevelType">
+    	<sequence>
+    		<element name="mslevel" maxOccurs="unbounded"
+    			minOccurs="1">
+    			<simpleType>
+    				<restriction base="int">
+    					<minExclusive value="1"></minExclusive>
+    					<maxExclusive value="3"></maxExclusive>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="CompressionType">
+    	<sequence>
+    	</sequence>
+    	<attribute name="use_32bit_for_mz" type="boolean"></attribute>
+    	<attribute name="use_32bit_for_intensity" type="boolean"></attribute>
+    	<attribute name="gzip_entire_file" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="PrecursorCorrectionType">
+    	<attribute name="recalculate" type="boolean"></attribute>
+    	<attribute name="refine" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="ThresholdParametersType">
+    	<choice>
+            <sequence>
+            	<choice><element name="TICAbsoluteThreshold" type="tns:AbsoluteThresholdType">
+    		</element><element name="TICRelativeThreshold" type="tns:RelativeThresholdType">
+    		</element><element name="BasePeakRelativeThreshold" type="tns:RelativeThresholdType">
+    		</element><element name="AbsoluteThreshold" type="tns:AbsoluteThresholdType">
+    		</element><element name="KeepNThresholdIncludingTies" type="tns:KeepNThresholdType">
+    		</element><element name="KeepNThreshold" type="tns:KeepNThresholdType">
+    		</element></choice>
+            </sequence>
+    	</choice>
+    </complexType>
+
+    <complexType name="KeepNThresholdType">
+    	<sequence>
+    		<element name="msLevels" type="tns:MsLevelType"></element>
+    	</sequence>
+    	<attribute name="what">
+    		<simpleType>
+    			<restriction base="tns:MostOrLeast">
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="n" type="int"></attribute>
+    </complexType>
+
+    <complexType name="AbsoluteThresholdType">
+    	<attribute name="what">
+    		<simpleType>
+    			<restriction base="tns:MostOrLeast">
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="intensity_threshold" type="double"></attribute>
+    </complexType>
+
+    <simpleType name="MostOrLeast">
+    	<restriction base="string">
+    		<enumeration value="MostIntense"></enumeration>
+    		<enumeration value="LeastIntense"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <complexType name="RelativeThresholdType">
+    	<attribute name="what" type="tns:MostOrLeast"></attribute>
+    	<attribute name="fraction" type="double"></attribute>
+    </complexType>
+
+    <complexType name="mzFilteringType">
+    	<sequence>
+    		<element name="mzWindowFilter" type="tns:mzWindowFilterType"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
+    		<element name="precursorFilter" type="double" minOccurs="0"
+    			maxOccurs="unbounded">
+    		</element>
+    		<element name="peakListLengthFilter" type="string" minOccurs="0" maxOccurs="1">
+    			<annotation>
+    				<documentation>eg. "100-" would denote keep spectra with 100 or more peaks in them</documentation>
+    			</annotation></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="mzWindowFilterType">
+    	<sequence>
+    		<element name="lower" type="double"></element>
+    		<element name="upper" type="double"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="noiseFilteringType">
+    	<attribute name="peaks_in_window" type="double"></attribute>
+    	<attribute name="window_width_da" type="double"></attribute>
+    	<attribute name="multicharge_fragment_relaxation" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="deisotopeFilteringType">
+    	<attribute name="hires" type="boolean"></attribute>
+    	<attribute name="mz_tolerance" type="double"></attribute>
+    </complexType>
+
+    <complexType name="etdFilteringType">
+    	<sequence>
+    		<element name="tolerance" type="string"></element>
+    	</sequence>
+    	<attribute name="remove_precursor" type="boolean"></attribute>
+    	<attribute name="remove_charge_reduced" type="boolean"></attribute>
+    	<attribute name="remove_neutral_loss" type="boolean"></attribute>
+    </complexType>
+
+    <complexType name="activationFilteringType">
+    	<sequence>
+    		<element name="accept">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="ETD"></enumeration>
+    					<enumeration value="CID"></enumeration>
+    					<enumeration value="SA"></enumeration>
+    					<enumeration value="HCD"></enumeration>
+    					<enumeration value="BIRD"></enumeration>
+    					<enumeration value="ECD"></enumeration>
+    					<enumeration value="IRMPD"></enumeration>
+    					<enumeration value="PD"></enumeration>
+    					<enumeration value="PSD"></enumeration>
+    					<enumeration value="PQD"></enumeration>
+    					<enumeration value="SID"></enumeration>
+    					<enumeration value="SORI"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+</schema>

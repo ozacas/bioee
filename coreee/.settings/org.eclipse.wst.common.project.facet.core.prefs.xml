@@ -1,0 +1,18 @@
+<root>
+  <facet id="jpt.jaxb">
+    <node name="classgen">
+      <attribute name="package" value="au.edu.unimelb.plantcell.servers.core.jaxb"/>
+    </node>
+    <node name="libprov">
+      <attribute name="provider-id" value="jaxb-user-library-provider"/>
+    </node>
+    <node name="platform">
+      <attribute name="platform-id" value="generic_2_1"/>
+    </node>
+    <node name="schemas">
+      <node name="schema-1">
+        <attribute name="location" value="platform:/resource/coreee/src/au/edu/unimelb/plantcell/servers/core/JobMessage.xsd"/>
+      </node>
+    </node>
+  </facet>
+</root>
