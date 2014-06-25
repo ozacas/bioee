@@ -13,26 +13,6 @@
       <ejb-name>MSConvertConfig</ejb-name>
       <ejb-class>au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConfig</ejb-class>
       <session-type>Stateful</session-type>
-      <env-entry>
-        <description>What is the msconvert executable path?</description>
-        <env-entry-name>MSCONVERT_PATH</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>c:/Program Files (x86)/ProteoWizard/ProteoWizard 3.0.4416/msconvert.exe</env-entry-value>
-      </env-entry>
-      
-       <env-entry>
-        <description>Where do the jobs store their data? You should create the folder if necessary</description>
-        <env-entry-name>MSCONVERT_TEMP_FOLDER</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>c:/temp/msconvert-out</env-entry-value>
-      </env-entry>
-      
-       <env-entry>
-        <description>Where is the command line usage for msconvert kept? (only used if MSCONVERT_PATH does not exist)</description>
-        <env-entry-name>MSCONVERT_USAGE</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>c:/work/src/mascotee/msconvertee/test-data/msconvert.usage</env-entry-value>
-      </env-entry>
     </session>
   </enterprise-beans>
 </ejb-jar>

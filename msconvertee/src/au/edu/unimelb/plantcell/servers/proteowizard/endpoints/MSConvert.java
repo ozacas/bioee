@@ -5,8 +5,6 @@ import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.soap.SOAPException;
 
-import au.edu.unimelb.plantcell.servers.proteowizard.jaxb.ProteowizardJobType;
-
 
 /**
  * Converts a raw Mass Spectrometry dataset via ProteoWizard (http://proteowizard.sourceforge.net) to an open-file format.
