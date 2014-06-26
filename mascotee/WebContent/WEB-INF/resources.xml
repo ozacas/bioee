@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <Resource id="connectionFactory" type="javax.jms.ConnectionFactory"/>
+    <Resource id="jobQueue" type="javax.jms.Queue"/>
+    <Resource id="completedQueue" type="javax.jms.Queue"/>
+</resources>

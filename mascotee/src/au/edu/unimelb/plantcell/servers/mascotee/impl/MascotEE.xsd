@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.plantcell.unimelb.edu.au/bioinformatics/ns/MascotEE/v2" 
+elementFormDefault="qualified" 
+xmlns="http://www.w3.org/2001/XMLSchema" 
+xmlns:mee="http://www.plantcell.unimelb.edu.au/bioinformatics/ns/MascotEE/v2"
+xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
+>
+
+
+
+    <annotation>
+    	<documentation>
+This schema is used to provide an XML document representation of Mascot (www.matrixscience.com) searches as used by mascotee (http://code.google.com/p/mascotee). In this way,
+we can be typesafe whilst providing suitable functionality. Future versions will use a different edition of the schema.</documentation></annotation>
+    <complexType name="Search">
+    		<choice>
+    			<element name="MsMsIonSearch" type="mee:MsMsIonSearch"></element>
+    			<element name="SequenceQuerySearch"
+    				type="mee:SeqQuerySearch">
+    			</element>
+    			<element name="PMFSearch" type="mee:PMFSearch"></element>
+    		</choice>
+    </complexType>
+
+
+    <complexType name="MsMsIonSearch">
+    	<sequence>
+    		<element name="identification" type="mee:Identification"></element>
+            <element name="parameters" type="mee:KeyParameters"></element>
+            <element name="constraints" type="mee:Constraints"></element>
+    		<element name="quant" type="mee:Quantitation"></element>
+    		<element name="data" type="mee:Data"></element>
+    		<element name="reporting" type="mee:Reporting"></element>
+    	</sequence>
+    </complexType>
+    
+    
+    <complexType name="PMFSearch">
+    	<sequence>
+    		<element name="identification" type="mee:Identification"></element>
+    		<element name="parameters" type="mee:KeyParameters"></element>
+    		<element name="constraints" type="mee:PMFConstraints"></element>
+    		<element name="pmf_data" type="mee:PMFData"></element>
+    		<element name="reporting" type="mee:Reporting"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="SeqQuerySearch">
+    	<sequence>
+    		<element name="identification" type="mee:Identification"></element>
+    		<element name="parameters" type="mee:KeyParameters"></element>
+    		<element name="constraints" type="mee:Constraints"></element>
+    		<element name="quantitation" type="mee:Quantitation"></element>
+    		<element name="query" type="mee:SeqQuery"></element>
+    		<element name="reporting" type="mee:Reporting"></element>
+    	</sequence>
+    </complexType>
+
+
+    <element name="MascotEE" type="mee:Search"></element>
+
+
+    <simpleType name="Username">
+    	<restriction base="string"></restriction>
+    </simpleType>
+
+    <simpleType name="Email">
+    	<restriction base="string"></restriction>
+    </simpleType>
+
+    <simpleType name="Title">
+    	<restriction base="string"></restriction>
+    </simpleType>
+
+
+    <simpleType name="MassValues">
+    	<restriction base="string">
+    		<enumeration value="MH+"></enumeration>
+    		<enumeration value="Mr"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <simpleType name="SequenceDatabase">
+    	<restriction base="string"></restriction>
+    </simpleType>
+
+
+    <complexType name="Constraints">
+    	<sequence>
+    		<element name="allowed_taxa" type="string"></element>
+    		<element name="allowed_protein_mass">
+    			<simpleType>
+    				<restriction base="string">
+    					<minLength value="0"></minLength>
+    					<maxLength value="10"></maxLength>
+    					<pattern value="^\d*$"></pattern>
+    				</restriction>
+    			</simpleType>
+    		</element>
+
+    		<element name="allow_x_missed_cleavages">
+    			<simpleType>
+    				<restriction base="int">
+    					<minInclusive value="0"></minInclusive>
+    					<maxInclusive value="9"></maxInclusive>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="enzyme" type="mee:Enzyme"></element>
+    		<element name="peptide_tolerance"
+    			type="mee:PeptideTolerance" minOccurs="1" maxOccurs="1">
+    		</element>
+    		<element name="msms_tolerance" type="mee:MSMSTolerance"></element>
+    		<element name="peptide_charge">
+    			<simpleType>
+    				<restriction base="string">
+    					<minLength value="2"></minLength>
+    					<maxLength value="12"></maxLength>
+    					<enumeration value="Mr"></enumeration>
+    					<enumeration value="1+"></enumeration>
+    					<enumeration value="2+"></enumeration>
+    					<enumeration value="3+"></enumeration>
+    					<enumeration value="4+"></enumeration>
+    					<enumeration value="5+"></enumeration>
+    					<enumeration value="6+"></enumeration>
+    					<enumeration value="7+"></enumeration>
+    					<enumeration value="8+"></enumeration>
+    					<enumeration value="2+ and 3+"></enumeration>
+    					<enumeration value="1+, 2+ and 3+"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+
+	<complexType name="PMFConstraints">
+    	<sequence>
+    		<element name="allowed_taxa" type="string"></element>
+    		<element name="allowed_protein_mass">
+    			<simpleType>
+    				<restriction base="string">
+    					<minLength value="0"></minLength>
+    					<maxLength value="10"></maxLength>
+    					<pattern value="^\d*$"></pattern>
+    				</restriction>
+    			</simpleType>
+    		</element>
+
+    		<element name="allow_x_missed_cleavages">
+    			<simpleType>
+    				<restriction base="int">
+    					<minInclusive value="0"></minInclusive>
+    					<maxInclusive value="9"></maxInclusive>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="enzyme" type="mee:Enzyme"></element>
+    		<element name="peptide_tolerance"
+    			type="mee:PeptideTolerance" minOccurs="1" maxOccurs="1">
+    		</element>
+    		<element name="mass_values">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Mr"></enumeration>
+    					<enumeration value="MH+"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+	</complexType>
+
+
+    <simpleType name="Enzyme">
+    	<restriction base="string"></restriction>
+    </simpleType>
+
+    <complexType name="Data">
+    	<sequence>
+    		<element name="format">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Mascot generic (MGF)"></enumeration>
+    					<enumeration value="Sequest (DTA)"></enumeration>
+    					<enumeration value="Finnigan (ASC)"></enumeration>
+    					<enumeration value="Micromass (PKL)"></enumeration>
+    					<enumeration value="PerSeptive (PKS)"></enumeration>
+    					<enumeration value="SciEx AP III"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="instrument" type="string"></element>
+    		<element name="precursor" minOccurs="0" maxOccurs="1">
+    			<annotation>
+    				<documentation>
+    					Only used for those file formats where precursor
+    					m/z information is not available. Otherwise
+    					ignored. As a result this may be omitted for
+    					common data formats in current use.
+    				</documentation>
+    			</annotation>
+    			<simpleType>
+    				<restriction base="string">
+    					<pattern value="^[\d\.]*$"></pattern>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="suggestedFileName" type="string"></element>
+    		<element name="file" type="base64Binary" xmime:expectedContentTypes="application/octet-stream"></element>
+    	</sequence>
+    </complexType>
+
+
+    <complexType name="Quantitation">
+    	<sequence>
+    		<element name="icat" type="boolean"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="Identification">
+    	<sequence>
+    		<element name="username" type="mee:Username"></element>
+    		<element name="email" type="mee:Email"></element>
+    		<element name="title" type="mee:Title"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PeptideTolerance">
+    	<sequence>
+    		<element name="value">
+    			<simpleType>
+    				<restriction base="string">
+    					<pattern value="^[\d\.]+$"></pattern>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="unit">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Da"></enumeration>
+    					<enumeration value="ppm"></enumeration>
+    					<enumeration value="mmu"></enumeration>
+    					<enumeration value="%"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="MSMSTolerance">
+    	<sequence>
+    		<element name="value">
+    			<simpleType>
+    				<restriction base="string">
+    					<pattern value="^[\d\.]+$"></pattern>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="unit">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Da"></enumeration>
+    					<enumeration value="mmu"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="Reporting">
+    	<sequence>
+    		<element name="overview" type="boolean" minOccurs="1" maxOccurs="1"></element>
+    		<element name="top" minOccurs="1" maxOccurs="1">
+    			<simpleType>
+    				<restriction base="string">
+    					<minLength value="1"></minLength>
+    					<maxLength value="10"></maxLength>
+    					<whiteSpace value="collapse"></whiteSpace>
+    					<enumeration value="5"></enumeration>
+    					<enumeration value="10"></enumeration>
+    					<enumeration value="20"></enumeration>
+    					<enumeration value="30"></enumeration>
+    					<enumeration value="50"></enumeration>
+    					<enumeration value="100"></enumeration>
+    					<enumeration value="200"></enumeration>
+    					<enumeration value="AUTO"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="KeyParameters">
+    	<sequence>
+    		<element name="database" type="mee:SequenceDatabase"></element>
+    		<element name="fixed_mod" type="string" minOccurs="0"
+    			maxOccurs="unbounded">
+    		</element>
+    		<element name="variable_mod" type="string" minOccurs="0"
+    			maxOccurs="unbounded">
+    		</element>
+    		<element name="mass_type">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Monoisotopic"></enumeration>
+    					<enumeration value="Average"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+
+
+    <complexType name="SeqQuery">
+    	<sequence>
+    		<element name="query" type="string"></element>
+    		<element name="instrument" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PMFData">
+    	<choice>
+    		<element name="source">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="MTOM"></enumeration>
+    					<enumeration value="FORM"></enumeration>
+    					<length value="4"></length>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="query" type="string"></element>
+    	</choice>
+    </complexType>
+</schema>
