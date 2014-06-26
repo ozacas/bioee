@@ -1,19 +1,16 @@
 package junit;
 
-import javax.annotation.Resource;
-import javax.ejb.EJB;
+import static org.junit.Assert.assertNotEquals;
+
 import javax.ejb.embeddable.EJBContainer;
-import javax.inject.Inject;
 import javax.naming.Context;
 
 import junit.framework.TestCase;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConfig;
 import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertFeature;
-import static org.junit.Assert.*;
 
 /**
  * Tests that parsing of the msconvert command line options is correct
