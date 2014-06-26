@@ -12,7 +12,8 @@
     <session>
       <ejb-name>MSConvertConfig</ejb-name>
       <ejb-class>au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConfig</ejb-class>
-      <session-type>Stateful</session-type>
+      <session-type>Stateless</session-type>
+      <transaction-type>Container</transaction-type>
     </session>
   </enterprise-beans>
 </ejb-jar>

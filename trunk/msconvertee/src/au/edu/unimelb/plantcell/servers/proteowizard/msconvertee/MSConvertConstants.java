@@ -13,4 +13,9 @@ public class MSConvertConstants {
 	 * Temporary folder where conversion files are stored. Only used if MSCONVERT_TEMP_FOLDER resource is not specified.
 	 */
 	public final static File MSCONVERT_TEMP_FOLDER = new File("c:/temp/msconvert-tmp-files");
+	
+	/**
+	 * Only used if no test file is configured. Otherwise not used
+	 */
+	public final static String MSCONVERT_USAGE_TEST_FILE="/home/acassin/src/bioee/msconvertee/test-data/msconvert.usage";
 }

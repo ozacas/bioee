@@ -1,8 +1,11 @@
 package au.edu.unimelb.plantcell.servers.proteowizard.msconvertee;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +18,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
-import javax.ejb.Singleton;
+import javax.ejb.Stateless;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -30,15 +33,15 @@ import org.apache.geronimo.mail.util.StringBufferOutputStream;
  * @author acassin
  *
  */
-@Singleton
+@Stateless
 @Lock(LockType.READ)
 public class MSConvertConfig {
 	// resources provided by TomEE
-	@Resource(mappedName="MSCONVERT_PATH")
+	@Resource(name="MSCONVERT_PATH")
 	private String msconvert_path;
-	@Resource(mappedName="MSCONVERT_TEMP_FOLDER")
+	@Resource
 	private String temp_data_folder;
-	@Resource(mappedName="MSCONVERT_USAGE")
+	@Resource(name="MSCONVERT_USAGE")
 	private String msconvert_usage;
 	
 	// fields
@@ -166,9 +169,32 @@ public class MSConvertConfig {
 		}
 	}
 	
-	private String loadLocalTestFile(String msconvert_usage2) {
-		// TODO Auto-generated method stub
-		return null;
+	private String loadLocalTestFile(String msconvert_usage_file) {
+		StringWriter sw = new StringWriter();
+		BufferedReader rdr = null;
+		if (msconvert_usage_file == null) {
+			msconvert_usage_file = MSConvertConstants.MSCONVERT_USAGE_TEST_FILE;
+		}
+		try {
+			rdr = new BufferedReader(new FileReader(new File(msconvert_usage_file)));
+			String line;
+			while ((line = rdr.readLine()) != null) {
+				sw.append(line);
+				sw.append("\n");
+			}
+			return sw.toString();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			return "";
+		} finally {
+			try {
+				if (rdr != null) {
+					rdr.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private String runMSConvertExecutable(final CommandLine msconvert) throws IOException {
