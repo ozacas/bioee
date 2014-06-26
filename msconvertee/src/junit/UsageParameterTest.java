@@ -9,8 +9,8 @@ import junit.framework.TestCase;
 
 import org.junit.Test;
 
+import au.edu.unimelb.plantcell.servers.proteowizard.endpoints.MSConvertFeature;
 import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConfig;
-import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertFeature;
 
 /**
  * Tests that parsing of the msconvert command line options is correct

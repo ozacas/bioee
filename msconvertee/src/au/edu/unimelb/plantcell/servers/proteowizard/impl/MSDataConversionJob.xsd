@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/NewXMLSchema" 
-		xmlns:tns="http://www.example.org/NewXMLSchema" elementFormDefault="qualified"
-		xmlns:xmime="http://www.w3.org/2005/05/xmlmime">
+<schema targetNamespace="http://www.plantcell.unimelb.edu.au/bioinformatics/schemas/v1/msconvertee" 
+		elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.plantcell.unimelb.edu.au/bioinformatics/schemas/v1/msconvertee" xmlns:xmime="http://www.w3.org/2005/05/xmlmime">
 
     <element name="ProteowizardJob" type="tns:ProteowizardJobType"></element>
     
@@ -46,12 +45,15 @@
     			type="tns:MsLevelType">
     		</element>
     		<element name="peakPicking" type="string"></element>
-            <element name="IntensityFilter" type="tns:ThresholdParametersType" minOccurs="0" maxOccurs="1">
+    		<element name="IntensityFilter"
+    			type="tns:ThresholdParametersType" minOccurs="0" maxOccurs="1">
     		</element>
-            <element name="mzFilter" type="tns:mzFilteringType" minOccurs="0" maxOccurs="1">
+    		<element name="mzWindowFilter" type="tns:WindowFilterType"
+    			minOccurs="0" maxOccurs="1">
 
     		</element>
-            <element name="polarityFilter" minOccurs="0" maxOccurs="1">
+    		<element name="polarityFilter" minOccurs="0"
+    			maxOccurs="1">
     			<simpleType>
     				<restriction base="string">
     					<enumeration value="positive"></enumeration>
@@ -59,11 +61,14 @@
     				</restriction>
     			</simpleType>
     		</element>
-            <element name="noiseFilter" type="tns:noiseFilteringType" minOccurs="0" maxOccurs="1">
+    		<element name="noiseFilter" type="tns:noiseFilteringType"
+    			minOccurs="0" maxOccurs="1">
     		</element>
-            <element name="activationFilter" type="tns:activationFilteringType" minOccurs="0" maxOccurs="1">
+    		<element name="activationFilter"
+    			type="tns:activationFilteringType" minOccurs="0" maxOccurs="1">
     		</element>
-            <element name="analyzerFilter" minOccurs="0" maxOccurs="1">
+    		<element name="analyzerFilter" minOccurs="0"
+    			maxOccurs="1">
     			<simpleType>
     				<restriction base="string">
     					<enumeration value="quad"></enumeration>
@@ -74,20 +79,37 @@
     				</restriction>
     			</simpleType>
     		</element>
-            <element name="deisotopeFilter" type="tns:deisotopeFilteringType" minOccurs="0" maxOccurs="1">
+    		<element name="deisotopeFilter"
+    			type="tns:deisotopeFilteringType" minOccurs="0" maxOccurs="1">
     		</element>
-            <element name="etdFilter" type="tns:etdFilteringType" minOccurs="0" maxOccurs="1"></element>
-        </sequence>
+    		<element name="etdFilter" type="tns:etdFilteringType"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
+    		<element name="scanFilter" type="tns:scanFilterType"></element>
+    		<element name="chargeStateFilter"
+    			type="tns:chargeStateFilterType">
+    		</element>
+    		<element name="mzPrecursorFilter"
+    			type="tns:mzPrecursorFilterType">
+    		</element>
+    		<element name="zeroesFilter" type="tns:zeroesFilterType"></element>
+    		<element name="ms2denoise" type="tns:MS2DenoiseType"></element>
+    		<element name="ms2deisotope" type="tns:MS2DeisotopeType"></element>
+    	</sequence>
     </complexType>
 
     <complexType name="MsLevelType">
-    	<sequence>
-    		<element name="mslevel" maxOccurs="unbounded"
+        <annotation>
+        	<documentation>If you are only interested in certain stages of fragmentation eg. MS/MS or MS/MS/MS you should specify the desired levels here eg. 2-3 would be specified
+as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentation>
+        </annotation>
+        <sequence>
+    		<element name="msLevel" maxOccurs="unbounded"
     			minOccurs="1">
     			<simpleType>
     				<restriction base="int">
     					<minExclusive value="1"></minExclusive>
-    					<maxExclusive value="3"></maxExclusive>
+    					<maxExclusive value="5"></maxExclusive>
     				</restriction>
     			</simpleType>
     		</element>
@@ -156,20 +178,6 @@
     	<attribute name="fraction" type="double"></attribute>
     </complexType>
 
-    <complexType name="mzFilteringType">
-    	<sequence>
-    		<element name="mzWindowFilter" type="tns:mzWindowFilterType"
-    			minOccurs="0" maxOccurs="1">
-    		</element>
-    		<element name="precursorFilter" type="double" minOccurs="0"
-    			maxOccurs="unbounded">
-    		</element>
-    		<element name="peakListLengthFilter" type="string" minOccurs="0" maxOccurs="1">
-    			<annotation>
-    				<documentation>eg. "100-" would denote keep spectra with 100 or more peaks in them</documentation>
-    			</annotation></element>
-    	</sequence>
-    </complexType>
 
     <complexType name="mzWindowFilterType">
     	<sequence>
@@ -200,7 +208,7 @@
 
     <complexType name="activationFilteringType">
     	<sequence>
-    		<element name="accept">
+    		<element name="activationToAccept" minOccurs="1" maxOccurs="20">
     			<simpleType>
     				<restriction base="string">
     					<enumeration value="ETD"></enumeration>
@@ -218,6 +226,83 @@
     				</restriction>
     			</simpleType>
     		</element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="scanFilterType">
+        <annotation>
+        	<documentation>Selects the specified scans to include in the output 
+(typically an integer is expected, although we permit non-integer values to support wierd formats)
+</documentation>
+        </annotation>
+        <sequence>
+    		<element name="firstInclusive" type="string"></element>
+    		<element name="lastInclusive" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="chargeStateFilterType">
+        <annotation>
+        	<documentation>0 can be used to denote including spectra with no charge state specified. </documentation>
+        </annotation>
+        <sequence>
+    		<element name="acceptCharge" type="int" minOccurs="1" maxOccurs="20"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="WindowFilterType">
+        <annotation>
+        	<documentation>Specify a range of (unitless) numeric values to accept. low must be less than, or equal to high.</documentation>
+        </annotation>
+        <sequence>
+    		<element name="low" type="double"></element>
+    		<element name="high" type="double"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="mzPrecursorFilterType">
+        <annotation>
+        	<documentation>specify a list of m/z values to accept. 0 may be used to specify accept when no precursor is available.</documentation>
+        </annotation>
+        <sequence>
+    		<element name="acceptMZ" type="string" minOccurs="1" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="zeroesFilterType">
+    	<sequence>
+    		<element name="mode" type="string">
+    			<annotation>
+    				<documentation>
+    					Either addMissing or removeExtra depending on
+    					the nature of the processing you want done.
+    				</documentation>
+    			</annotation>
+    		</element>
+    		<element name="flankingZeroCount" type="int"></element>
+    		<element name="applyToMsLevel" type="int" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="MS2DenoiseType">
+    	<sequence>
+    		<element name="peaksInWindow" type="int" minOccurs="0"
+    			maxOccurs="1">
+    		</element>
+    		<element name="windowWidth" type="double" minOccurs="0"
+    			maxOccurs="1">
+    			<annotation>
+    				<documentation>In Dalton</documentation>
+    			</annotation>
+    		</element>
+    		<element name="multichargeFragmentRelaxation" type="boolean" minOccurs="0" maxOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="MS2DeisotopeType">
+    	<sequence>
+    		<element name="hires" type="boolean"></element>
+    		<element name="mz_tolerance" type="double" minOccurs="0" maxOccurs="1"></element>
     	</sequence>
     </complexType>
 </schema>

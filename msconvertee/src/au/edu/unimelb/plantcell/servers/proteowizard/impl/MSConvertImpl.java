@@ -18,6 +18,7 @@ import javax.xml.ws.soap.MTOM;
 import au.edu.unimelb.plantcell.servers.core.AbstractWebService;
 import au.edu.unimelb.plantcell.servers.core.SendMessage;
 import au.edu.unimelb.plantcell.servers.proteowizard.endpoints.MSConvert;
+import au.edu.unimelb.plantcell.servers.proteowizard.endpoints.MSConvertFeature;
 import au.edu.unimelb.plantcell.servers.proteowizard.endpoints.ProteowizardJob;
 import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConfig;
 import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConstants;
@@ -66,6 +67,21 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 		}
 	}
 
+	@Override
+	public boolean supportsAllFeatures(final MSConvertFeature[] features) throws SOAPException {
+		if (config == null)
+			throw new SOAPException("No MSConvert configuration - check your installation!");
+		return config.supportsAllFeatures(features);
+	}
+
+	@Override
+	public boolean supportsAnyFeature(final MSConvertFeature[] features)
+			throws SOAPException {
+		if (config == null)
+			throw new SOAPException("No MSConvert configuration - check your installation!");
+		return config.supportsAnyFeature(features);
+	}
+	
 	@Override
 	public String getStatus(String jobID) throws SOAPException {
 		if (jobQueue == null || doneQueue == null || runQueue == null) {
@@ -144,5 +160,5 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	protected Logger getLogger() {
 		return logger;
 	}
-	
+
 }
