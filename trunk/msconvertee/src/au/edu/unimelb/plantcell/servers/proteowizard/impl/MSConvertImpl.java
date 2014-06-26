@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.Stateless;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
@@ -23,6 +24,7 @@ import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConsta
 import au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertJob;
 
 
+@Stateless
 @MTOM
 @WebService(endpointInterface = "au.edu.unimelb.plantcell.servers.proteowizard.endpoints.MSConvert")
 public class MSConvertImpl extends AbstractWebService implements MSConvert {
