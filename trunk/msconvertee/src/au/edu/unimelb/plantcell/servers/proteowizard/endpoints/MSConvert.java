@@ -17,6 +17,16 @@ import javax.xml.soap.SOAPException;
 @WebService
 public interface MSConvert {
 	/**
+	 * Service support all of the specified features?
+	 */
+	public boolean supportsAllFeatures(final MSConvertFeature[] features) throws SOAPException;
+	
+	/**
+	 * Service support any of the specified features?
+	 */
+	public boolean supportsAnyFeature(final MSConvertFeature[] features) throws SOAPException;
+	
+	/**
 	 * Validates all parameters of the job and throws an exception if any invalid settings are detected.
 	 * Does no conversion. In theory, this should be queued as well as you could launch a denial of service attack
 	 * otherwise.

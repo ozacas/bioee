@@ -27,6 +27,8 @@ import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.geronimo.mail.util.StringBufferOutputStream;
 
+import au.edu.unimelb.plantcell.servers.proteowizard.endpoints.MSConvertFeature;
+
 /**
  * Solely responsible for all state relating to the msconvert installation. Provides
  * a rich API for clients to use across the service.
