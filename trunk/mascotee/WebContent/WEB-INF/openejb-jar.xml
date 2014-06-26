@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openejb-jar xmlns="http://openejb.apache.org/xml/ns/openejb-jar-2.2">
+    
+  <enterprise-beans>
+	  <session id="DatFileService">
+	  	 <ejb-name>DatFileService</ejb-name>
+	  </session>
+	  
+	  <session id="ConfigService">
+	  	<ejb-name>ConfigService</ejb-name>
+	  </session>
+	  
+	  <session id="SearchService">
+	      <ejb-name>SearchService</ejb-name>
+	  </session>
+	  
+	  <session id="MascotConfig">
+	  	<ejb-name>MascotConfig</ejb-name>
+	  </session>
+	  
+	  <!--  <session id="TestAuthService">
+	      <ejb-name>TestAuthService</ejb-name>
+	      <web-service-security>
+       	 	<security-realm-name>MascotEE</security-realm-name>
+        	<transport-guarantee>NONE</transport-guarantee>
+         	<auth-method>WS-SECURITY</auth-method>
+         	<properties>
+            	wss4j.in.action       = UsernameToken
+            	wss4j.in.passwordType = PasswordDigest
+            	wss4j.in.passwordCallbackClass=test.auth.AuthCallback
+         	</properties>
+        </web-service-security>
+	  </session> -->
+	</enterprise-beans>
+</openejb-jar>

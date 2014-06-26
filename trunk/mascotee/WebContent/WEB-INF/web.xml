@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>mascotee</display-name>
+  <servlet>
+      <description>MascotEE -- web service interface to Mascot (www.matrixscience.com)</description>
+      <servlet-name>mascotee</servlet-name>
+      <servlet-class>au.edu.unimelb.plantcell.servers.mascotee.rest.servlet</servlet-class>
+      <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>mascotee</servlet-name>
+      <url-pattern>/jaxrs/*</url-pattern>		<!--  reserved for future use -->
+  </servlet-mapping>
+  
+   	  <env-entry>
+        <description>Where the root folder for the mascot installation is located. For PCBRC, it is /main/mascot</description>
+        <env-entry-name>RootFolder</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>/main/mascot</env-entry-value>
+      </env-entry>
+      
+      <env-entry>
+        <description>Where the mascot.dat configuration file is located. For PCBRC, it is /main/mascot/config/mascot.dat</description>
+        <env-entry-name>ConfigFile</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>/main/mascot/config/mascot.dat</env-entry-value>
+      </env-entry>
+      
+      <env-entry>
+        <description>Where the modifications configuration file is located. For PCBRC, it is /main/mascot/config/mod_file</description>
+        <env-entry-name>ModFile</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>/main/mascot/config/mod_file</env-entry-value>
+      </env-entry>
+      
+      <env-entry>
+        <description>URL for MascotEE when deployed. Base URL for all web services. Must end with slash character ie. /</description>
+        <env-entry-name>MascotEE_URL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>http://mascot.plantcell.unimelb.edu.au:8080/mascotee/</env-entry-value>
+      </env-entry>
+</web-app>
