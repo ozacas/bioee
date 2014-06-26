@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -34,6 +35,7 @@ import org.apache.geronimo.mail.util.StringBufferOutputStream;
  *
  */
 @Stateless
+@ApplicationScoped
 @Lock(LockType.READ)
 public class MSConvertConfig {
 	// resources provided by TomEE
@@ -77,6 +79,8 @@ public class MSConvertConfig {
 		plugin_map.put("sortByScanTime", MSConvertFeature.SORT_BY_SCAN_TIME);
 		plugin_map.put("stripIT", MSConvertFeature.REMOVE_ION_TRAP_MS1_SCANS);
 		plugin_map.put("mzWindow", MSConvertFeature.FILTER_BY_MZ);
+		plugin_map.put("threshold", MSConvertFeature.FILTER_BY_INTENSITY_THRESHOLD);		// two different plugins with similar features
+		plugin_map.put("mzPresent", MSConvertFeature.FILTER_BY_INTENSITY_THRESHOLD);
 		plugin_map.put("mzPrecursor", MSConvertFeature.FILTER_BY_PRECURSOR);
 		plugin_map.put("zeroSamples", MSConvertFeature.FILTER_BY_ZERO_INTENSITY);
 		plugin_map.put("MS2Denoise", MSConvertFeature.MS2_DENOISE);
@@ -272,8 +276,44 @@ public class MSConvertConfig {
 		return ret;
 	}
 	
+	/**
+	 * Tests for a single feature
+	 * @param feature
+	 * @return true if feature is available with msconvert version, false otherwise
+	 */
 	public boolean supportsFeature(final MSConvertFeature feature) {
 		parse();
 		return supported_features.contains(feature);
+	}
+	
+	/**
+	 * Tests that all the supplied features are present
+	 * @param features must not be null
+	 * @return true if all features are available, false otherwise
+	 */
+	public boolean supportsAllFeatures(final MSConvertFeature[] features) {
+		parse();
+		for (MSConvertFeature f : features) {
+			if (!supported_features.contains(f)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Tests if any of the supplied features are supported
+	 * 
+	 * @param features must not be null
+	 * @return true if any of the features are supported, false otherwise
+	 */
+	public boolean supportsAnyFeature(final MSConvertFeature[] features) {
+		parse();
+		for (MSConvertFeature f : features) {
+			if (supported_features.contains(f)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

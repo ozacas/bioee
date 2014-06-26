@@ -23,4 +23,7 @@ public enum MSConvertFeature {
 	
 	// data compression
 	COMPRESS_BINARY_DATA, COMPRESS_ENTIRE_FILE, 
+	
+	// this feature is NEVER available and is used by test cases to test the negative result
+	UNSUPPORTED_FEATURE, 
 }
