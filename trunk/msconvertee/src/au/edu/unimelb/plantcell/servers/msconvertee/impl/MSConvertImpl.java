@@ -1,6 +1,8 @@
 package au.edu.unimelb.plantcell.servers.msconvertee.impl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.activation.DataHandler;
@@ -77,6 +79,19 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 		if (config == null)
 			throw new SOAPException("No MSConvert configuration - check your installation!");
 		return config.supportsAnyFeature(features);
+	}
+	
+	@Override
+	public List<MSConvertFeature> supportedFeatures() throws SOAPException {
+		if (config == null)
+			throw new SOAPException("No MSConvert configuration - check your installation!");
+		ArrayList<MSConvertFeature> ret = new ArrayList<MSConvertFeature>();
+		for (MSConvertFeature f : MSConvertFeature.values()) {
+			if (config.supportsFeature(f)) {
+				ret.add(f);
+			}
+		}
+		return ret;
 	}
 	
 	@Override
@@ -158,4 +173,5 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 		return logger;
 	}
 
+	
 }
