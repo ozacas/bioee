@@ -1,5 +1,7 @@
 package au.edu.unimelb.plantcell.servers.msconvertee.endpoints;
 
+import java.util.List;
+
 import javax.activation.DataHandler;
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlMimeType;
@@ -16,6 +18,12 @@ import javax.xml.soap.SOAPException;
  */
 @WebService
 public interface MSConvert {
+	/**
+	 * Returns list of supported features
+	 * @throws SOAPException 
+	 */
+	public List<MSConvertFeature> supportedFeatures() throws SOAPException;
+	
 	/**
 	 * Service support all of the specified features?
 	 */
