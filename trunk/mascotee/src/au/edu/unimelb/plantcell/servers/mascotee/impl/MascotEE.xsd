@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://www.plantcell.unimelb.edu.au/bioinformatics/ns/MascotEE/v2" 
-elementFormDefault="qualified" 
-xmlns="http://www.w3.org/2001/XMLSchema" 
-xmlns:mee="http://www.plantcell.unimelb.edu.au/bioinformatics/ns/MascotEE/v2"
-xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
->
+<schema targetNamespace="http://www.plantcell.unimelb.edu.au/bioinformatics/schemas/v2/MascotEE" 
+elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:mee="http://www.plantcell.unimelb.edu.au/bioinformatics/schemas/v2/MascotEE" xmlns:xmime="http://www.w3.org/2005/05/xmlmime">
 
 
 
