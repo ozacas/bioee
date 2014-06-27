@@ -1,7 +1,7 @@
 <root>
   <facet id="jpt.jaxb">
     <node name="classgen">
-      <attribute name="package" value="au.edu.unimelb.plantcell.servers.proteowizard.jaxb"/>
+      <attribute name="package" value="au.edu.unimelb.plantcell.servers.msconvertee.jaxb"/>
     </node>
     <node name="libprov">
       <attribute name="provider-id" value="jaxb-user-library-provider"/>
@@ -12,6 +12,9 @@
     <node name="schemas">
       <node name="schema-1">
         <attribute name="location" value="platform:/resource/msconvertee/src/au/edu/unimelb/plantcell/servers/proteowizard/impl/MSDataConversionJob.xsd"/>
+      </node>
+      <node name="schema-2">
+        <attribute name="location" value="platform:/resource/msconvertee/src/au/edu/unimelb/plantcell/servers/msconvertee/impl/MSDataConversionJob.xsd"/>
       </node>
     </node>
   </facet>
