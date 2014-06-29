@@ -1,9 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openejb-jar xmlns="http://openejb.apache.org/xml/ns/openejb-jar-2.2">
-    
-  <enterprise-beans>
-	  <session id="MSConvert">
-	  	 <ejb-name>MSConvert</ejb-name>
-	  </session>
-  </enterprise-beans>
 </openejb-jar>

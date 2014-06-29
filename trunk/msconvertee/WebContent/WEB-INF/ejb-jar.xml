@@ -3,15 +3,8 @@
   <enterprise-beans>
     <session>
       <ejb-name>MSConvertService</ejb-name>
-      <service-endpoint>au.edu.unimelb.plantcell.servers.proteowizard.endpoints.MSConvert</service-endpoint>
-      <ejb-class>au.edu.unimelb.plantcell.servers.proteowizard.impl.MSConvertImpl</ejb-class>
-      <session-type>Stateless</session-type>
-      <transaction-type>Container</transaction-type>
-    </session>
-   
-    <session>
-      <ejb-name>MSConvertConfig</ejb-name>
-      <ejb-class>au.edu.unimelb.plantcell.servers.proteowizard.msconvertee.MSConvertConfig</ejb-class>
+      <service-endpoint>au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvert</service-endpoint>
+      <ejb-class>au.edu.unimelb.plantcell.servers.msconvertee.impl.MSConvertImpl</ejb-class>
       <session-type>Stateless</session-type>
       <transaction-type>Container</transaction-type>
     </session>
