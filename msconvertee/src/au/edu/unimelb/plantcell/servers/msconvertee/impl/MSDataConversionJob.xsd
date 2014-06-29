@@ -11,12 +11,18 @@
     		</element>
     		<element name="OutputFormat" minOccurs="1" maxOccurs="1">
     			<simpleType>
+    				<annotation>
+    					<documentation>
+    						Must be one of MGF, MzXML or MzML or MZ5
+    					</documentation>
+    				</annotation>
     				<restriction base="string">
     					<enumeration value="MGF"></enumeration>
     					<enumeration value="MzML"></enumeration>
     					<enumeration value="MzXML"></enumeration>
     					<minLength value="3"></minLength>
     					<maxLength value="20"></maxLength>
+    					<enumeration value="MZ5"></enumeration>
     				</restriction>
     			</simpleType>
     		</element>
@@ -33,7 +39,21 @@
     <complexType name="DataFileType">
     	<sequence>
     		<element name="order" type="int"></element>
-    		<element name="format" type="string"></element>
+    		<element name="format">
+                <annotation>
+                	<documentation>Must be one of: Wiff, Raw, MGF, MzXML, MzML or MZ5</documentation>
+                </annotation>
+                <simpleType>
+    				<restriction base="string">
+    					<enumeration value="wiff"></enumeration>
+    					<enumeration value="raw"></enumeration>
+    					<enumeration value="mgf"></enumeration>
+    					<enumeration value="mzxml"></enumeration>
+    					<enumeration value="mzml"></enumeration>
+    					<enumeration value="mz5"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
     		<element name="suggestedName" type="string"></element>
     		<element name="data" type="base64Binary" xmime:expectedContentTypes="application/octet-stream"></element>
     	</sequence>
@@ -41,10 +61,10 @@
 
     <complexType name="FilterParametersType">
     	<sequence>
-    		<element name="msLevelFilter" minOccurs="0" maxOccurs="3"
+    		<element name="msLevelFilter" minOccurs="0" maxOccurs="1"
     			type="tns:MsLevelType">
     		</element>
-    		<element name="peakPicking" type="string"></element>
+    		<element name="peakPicking" type="string" minOccurs="0" maxOccurs="1"></element>
     		<element name="IntensityFilter"
     			type="tns:ThresholdParametersType" minOccurs="0" maxOccurs="1">
     		</element>
@@ -85,16 +105,16 @@
     		<element name="etdFilter" type="tns:etdFilteringType"
     			minOccurs="0" maxOccurs="1">
     		</element>
-    		<element name="scanFilter" type="tns:scanFilterType"></element>
+    		<element name="scanFilter" type="tns:scanFilterType" minOccurs="0" maxOccurs="1"></element>
     		<element name="chargeStateFilter"
-    			type="tns:chargeStateFilterType">
+    			type="tns:chargeStateFilterType" minOccurs="0" maxOccurs="1">
     		</element>
     		<element name="mzPrecursorFilter"
-    			type="tns:mzPrecursorFilterType">
+    			type="tns:mzPrecursorFilterType" minOccurs="0" maxOccurs="1">
     		</element>
-    		<element name="zeroesFilter" type="tns:zeroesFilterType"></element>
-    		<element name="ms2denoise" type="tns:MS2DenoiseType"></element>
-    		<element name="ms2deisotope" type="tns:MS2DeisotopeType"></element>
+    		<element name="zeroesFilter" type="tns:zeroesFilterType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="ms2denoise" type="tns:MS2DenoiseType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="ms2deisotope" type="tns:MS2DeisotopeType" minOccurs="0" maxOccurs="1"></element>
     	</sequence>
     </complexType>
 

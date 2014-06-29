@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
-import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.exec.CommandLine;
@@ -36,7 +35,6 @@ import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvertFeature;
  * @author acassin
  *
  */
-@Stateless
 @ApplicationScoped
 @Lock(LockType.READ)
 public class MSConvertConfig {

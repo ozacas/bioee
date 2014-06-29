@@ -26,7 +26,7 @@ import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
 
 @Stateless
 @MTOM
-@WebService(endpointInterface = "au.edu.unimelb.plantcell.servers.proteowizard.endpoints.MSConvert")
+@WebService(endpointInterface = "au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvert")
 public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	private final static Logger logger = Logger.getLogger("MSConvert Service");
 
@@ -152,7 +152,7 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 
 	@Override
 	public void validateJob(final ProteowizardJob job) throws SOAPException {
-		throw new SOAPException("Not yet implemented!");
+		new ProteowizardJobValidator().validate(job);
 	}
 
 	@Override
