@@ -17,26 +17,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * If you are only interested in certain stages of fragmentation eg. MS/MS or MS/MS/MS you should specify the desired levels here eg. 2-3 would be specified
- * as <msLevel>2</msLevel><msLevel>3</msLevel>
- * 
- * <p>Java class for MsLevelType complex type.
+ * <p>Java class for ScanEventFilterType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="MsLevelType">
+ * &lt;complexType name="ScanEventFilterType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="msLevel" maxOccurs="unbounded">
- *           &lt;simpleType>
- *             &lt;restriction base="{http://www.w3.org/2001/XMLSchema}int">
- *               &lt;minExclusive value="1"/>
- *               &lt;maxExclusive value="5"/>
- *             &lt;/restriction>
- *           &lt;/simpleType>
- *         &lt;/element>
+ *         &lt;element name="acceptEvent" type="{http://www.w3.org/2001/XMLSchema}int" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -46,27 +36,27 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "MsLevelType", propOrder = {
-    "msLevel"
+@XmlType(name = "ScanEventFilterType", propOrder = {
+    "acceptEvent"
 })
-public class MsLevelType {
+public class ScanEventFilterType {
 
     @XmlElement(type = Integer.class)
-    protected List<Integer> msLevel;
+    protected List<Integer> acceptEvent;
 
     /**
-     * Gets the value of the msLevel property.
+     * Gets the value of the acceptEvent property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the msLevel property.
+     * This is why there is not a <CODE>set</CODE> method for the acceptEvent property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getMsLevel().add(newItem);
+     *    getAcceptEvent().add(newItem);
      * </pre>
      * 
      * 
@@ -76,11 +66,11 @@ public class MsLevelType {
      * 
      * 
      */
-    public List<Integer> getMsLevel() {
-        if (msLevel == null) {
-            msLevel = new ArrayList<Integer>();
+    public List<Integer> getAcceptEvent() {
+        if (acceptEvent == null) {
+            acceptEvent = new ArrayList<Integer>();
         }
-        return this.msLevel;
+        return this.acceptEvent;
     }
 
 }
