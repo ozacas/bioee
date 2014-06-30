@@ -64,7 +64,7 @@
     		<element name="msLevelFilter" minOccurs="0" maxOccurs="1"
     			type="tns:MsLevelType">
     		</element>
-    		<element name="peakPicking" type="string" minOccurs="0" maxOccurs="1"></element>
+    		<element name="peakPicking" type="tns:peakPickingType" minOccurs="0" maxOccurs="1"></element>
     		<element name="IntensityFilter"
     			type="tns:ThresholdParametersType" minOccurs="0" maxOccurs="1">
     		</element>
@@ -80,9 +80,6 @@
     					<enumeration value="negative"></enumeration>
     				</restriction>
     			</simpleType>
-    		</element>
-    		<element name="noiseFilter" type="tns:noiseFilteringType"
-    			minOccurs="0" maxOccurs="1">
     		</element>
     		<element name="activationFilter"
     			type="tns:activationFilteringType" minOccurs="0" maxOccurs="1">
@@ -105,7 +102,9 @@
     		<element name="etdFilter" type="tns:etdFilteringType"
     			minOccurs="0" maxOccurs="1">
     		</element>
-    		<element name="scanFilter" type="tns:scanFilterType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="scanFilter" type="tns:ScanFilterType"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
     		<element name="chargeStateFilter"
     			type="tns:chargeStateFilterType" minOccurs="0" maxOccurs="1">
     		</element>
@@ -114,7 +113,6 @@
     		</element>
     		<element name="zeroesFilter" type="tns:zeroesFilterType" minOccurs="0" maxOccurs="1"></element>
     		<element name="ms2denoise" type="tns:MS2DenoiseType" minOccurs="0" maxOccurs="1"></element>
-    		<element name="ms2deisotope" type="tns:MS2DeisotopeType" minOccurs="0" maxOccurs="1"></element>
     	</sequence>
     </complexType>
 
@@ -151,15 +149,12 @@ as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentati
 
     <complexType name="ThresholdParametersType">
     	<choice>
-            <sequence>
-            	<choice><element name="TICAbsoluteThreshold" type="tns:AbsoluteThresholdType">
-    		</element><element name="TICRelativeThreshold" type="tns:RelativeThresholdType">
-    		</element><element name="BasePeakRelativeThreshold" type="tns:RelativeThresholdType">
-    		</element><element name="AbsoluteThreshold" type="tns:AbsoluteThresholdType">
-    		</element><element name="KeepNThresholdIncludingTies" type="tns:KeepNThresholdType">
-    		</element><element name="KeepNThreshold" type="tns:KeepNThresholdType">
-    		</element></choice>
-            </sequence>
+            <element name="TICAbsoluteThreshold" type="tns:AbsoluteThresholdType" />
+   			<element name="TICRelativeThreshold" type="tns:RelativeThresholdType" />
+    		<element name="BasePeakRelativeThreshold" type="tns:RelativeThresholdType" />
+    		<element name="AbsoluteThreshold" type="tns:AbsoluteThresholdType" />
+    		<element name="KeepNThresholdIncludingTies" type="tns:KeepNThresholdType" />
+    		<element name="KeepNThreshold" type="tns:KeepNThresholdType" />
     	</choice>
     </complexType>
 
@@ -249,17 +244,6 @@ as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentati
     	</sequence>
     </complexType>
 
-    <complexType name="scanFilterType">
-        <annotation>
-        	<documentation>Selects the specified scans to include in the output 
-(typically an integer is expected, although we permit non-integer values to support wierd formats)
-</documentation>
-        </annotation>
-        <sequence>
-    		<element name="firstInclusive" type="string"></element>
-    		<element name="lastInclusive" type="string"></element>
-    	</sequence>
-    </complexType>
 
     <complexType name="chargeStateFilterType">
         <annotation>
@@ -319,10 +303,43 @@ as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentati
     	</sequence>
     </complexType>
 
-    <complexType name="MS2DeisotopeType">
+
+    <complexType name="peakPickingType">
     	<sequence>
-    		<element name="hires" type="boolean"></element>
-    		<element name="mz_tolerance" type="double" minOccurs="0" maxOccurs="1"></element>
+    		<element name="preferVendor" type="boolean"></element>
+    		<element name="msLevels" type="tns:MsLevelType"></element>
     	</sequence>
+    </complexType>
+
+
+    <complexType name="ScanEventFilterType">
+    	<sequence>
+    		<element name="acceptEvent" type="int" minOccurs="1" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="ScanNumberFilterType">
+    	<sequence>
+    		<element name="acceptScan" type="int" minOccurs="1" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="ScanTimeFilterType">
+    	<sequence>
+    		<element name="lower" type="double"></element>
+    		<element name="upper" type="double"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="ScanFilterType">
+    	<choice>
+    		<element name="numberFilter"
+    			type="tns:ScanNumberFilterType">
+    		</element>
+    		<element name="eventFilter"
+    			type="tns:ScanEventFilterType">
+    		</element>
+    		<element name="timeFilter" type="tns:ScanTimeFilterType"></element>
+    	</choice>
     </complexType>
 </schema>
