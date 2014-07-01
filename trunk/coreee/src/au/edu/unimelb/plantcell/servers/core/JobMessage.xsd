@@ -23,6 +23,10 @@
     		<element name="url" type="string" minOccurs="0"
     			maxOccurs="unbounded">
     		</element>
+    		<element name="uuid" type="string" minOccurs="0" maxOccurs="unbounded">
+    			<annotation>
+    				<documentation>uuid and url must have the same number of elements in them (parallel vectors)</documentation>
+    			</annotation></element>
     	</sequence>
     </complexType>
     
