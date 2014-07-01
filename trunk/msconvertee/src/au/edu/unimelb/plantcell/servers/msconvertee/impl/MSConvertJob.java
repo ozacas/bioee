@@ -90,6 +90,7 @@ public class MSConvertJob extends JobMessageType {
 	 */
 	private void saveData(final ProteowizardJob job) {
 		final List<String> urls = this.getInputData().getUrl();
+		urls.clear();
 		for (DataFileType dft : job.getDataFile()) {
 			FileOutputStream os = null;
 			try {
@@ -109,7 +110,7 @@ public class MSConvertJob extends JobMessageType {
 				}
 			}
 		}
-		job.getDataFile().clear();
+		job.getDataFile().clear();		// dont want to persist the original XML related to the input data now that it has been successfully copied to this
 	}
 	
 	public File getDataFolder() {
@@ -133,6 +134,31 @@ public class MSConvertJob extends JobMessageType {
 	 */
 	public ProteowizardJob asProteowizardJob() throws JAXBException,IOException {
 		return unmarshal();
+	}
+
+	/**
+	 * Return the local data URI for the specified input data file's UUID. In this way code is isolated from
+	 * having to know where/how the data is stored (only msconvert code needs to know for the purposes of the correct command line)
+	 * 
+	 * @param uuid
+	 * @return
+	 */
+	public String getDataURI(final UUID uuid) {
+		assert(uuid != null);
+		
+		List<String> uris = inputData.getUrl();
+		List<String> ids  = inputData.getUuid();
+		if (uris.size() != ids.size()) {
+			// vectors must be the same size ie. every data file has a corresponding id...
+			return null;
+		}
+		for (int i=0; i<uris.size(); i++) {
+			UUID u = UUID.fromString(ids.get(i));
+			if (u.equals(uuid)) {
+				return uris.get(i);
+			}
+		}
+		return null;
 	}
 
 }

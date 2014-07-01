@@ -172,6 +172,4 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	protected Logger getLogger() {
 		return logger;
 	}
-
-	
 }
