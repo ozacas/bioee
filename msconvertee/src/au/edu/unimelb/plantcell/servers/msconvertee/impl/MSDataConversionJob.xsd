@@ -40,10 +40,13 @@
     	<sequence>
     		<element name="order" type="int"></element>
     		<element name="format">
-                <annotation>
-                	<documentation>Must be one of: Wiff, Raw, MGF, MzXML, MzML or MZ5</documentation>
-                </annotation>
-                <simpleType>
+    			<annotation>
+    				<documentation>
+    					Must be one of: Wiff, Raw, MGF, MzXML, MzML or
+    					MZ5
+    				</documentation>
+    			</annotation>
+    			<simpleType>
     				<restriction base="string">
     					<enumeration value="wiff"></enumeration>
     					<enumeration value="raw"></enumeration>
@@ -55,7 +58,10 @@
     			</simpleType>
     		</element>
     		<element name="suggestedName" type="string"></element>
-    		<element name="data" type="base64Binary" xmime:expectedContentTypes="application/octet-stream"></element>
+    		<element name="data" type="base64Binary"
+    			xmime:expectedContentTypes="application/octet-stream">
+    		</element>
+    		<element name="UUID" type="string"></element>
     	</sequence>
     </complexType>
 

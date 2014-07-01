@@ -57,7 +57,6 @@ public class MSConvertJobProcessor implements MessageListener {
 	
 	
 	public MSConvertJobProcessor() {
-		
 	}
 	
 	/*
