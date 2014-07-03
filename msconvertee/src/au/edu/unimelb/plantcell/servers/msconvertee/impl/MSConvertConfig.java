@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Resource;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
+import javax.ejb.Singleton;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.exec.CommandLine;
@@ -36,12 +37,13 @@ import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvertFeature;
  *
  */
 @ApplicationScoped
+@Singleton
 @Lock(LockType.READ)
 public class MSConvertConfig {
 	// resources provided by TomEE
 	@Resource(name="MSCONVERT_PATH")
 	private String msconvert_path;
-	@Resource
+	@Resource(name="MSCONVERT_TEMP_FOLDER")
 	private String temp_data_folder;
 	@Resource(name="MSCONVERT_USAGE")
 	private String msconvert_usage;
@@ -154,7 +156,7 @@ public class MSConvertConfig {
 				if (line.equals("Options:")) {
 					reached_options = true;
 					continue;
-				} else if (line.equals("Filter options:")) {
+				} else if (line.toLowerCase().startsWith("filter options")) {
 					reached_filter_options = true;
 					continue;
 				} else if (line.equals("Examples:")) {
@@ -222,11 +224,12 @@ public class MSConvertConfig {
 
 	private void grokFilterOption(String line) {
 		assert(line != null);
-		if (line.trim().length() < 1) {
+		String tline = line.trim();
+		if (tline.length() < 1) {
 			return;
 		}
 		Pattern p = Pattern.compile("^(\\w+)\\s");
-		Matcher m = p.matcher(line.trim());
+		Matcher m = p.matcher(tline);
 		if (m.find()) {
 			String filter = m.group(1);
 			if (plugin_map.containsKey(filter)) {

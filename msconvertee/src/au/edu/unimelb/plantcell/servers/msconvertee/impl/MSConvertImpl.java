@@ -15,7 +15,9 @@ import javax.jms.TextMessage;
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.soap.SOAPException;
+import javax.xml.ws.BindingType;
 import javax.xml.ws.soap.MTOM;
+import javax.xml.ws.soap.SOAPBinding;
 
 import au.edu.unimelb.plantcell.servers.core.AbstractWebService;
 import au.edu.unimelb.plantcell.servers.core.SendMessage;
@@ -26,6 +28,7 @@ import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
 
 @Stateless
 @MTOM
+@BindingType(value=SOAPBinding.SOAP11HTTP_MTOM_BINDING)
 @WebService(endpointInterface = "au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvert")
 public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	private final static Logger logger = Logger.getLogger("MSConvert Service");
@@ -66,6 +69,11 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 		}
 	}
 
+	@Override
+	public MSConvertFeature[] allFeatures() throws SOAPException {
+		return MSConvertFeature.values();
+	}
+	
 	@Override
 	public boolean supportsAllFeatures(final MSConvertFeature[] features) throws SOAPException {
 		if (config == null)
