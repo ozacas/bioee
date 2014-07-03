@@ -27,8 +27,8 @@ import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
 
 
 @Stateless
-@MTOM
-@BindingType(value=SOAPBinding.SOAP11HTTP_MTOM_BINDING)
+@MTOM			// this is preferred way to request MTOM
+@BindingType(value=SOAPBinding.SOAP11HTTP_MTOM_BINDING)		// but some old app servers need this instead
 @WebService(endpointInterface = "au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvert")
 public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	private final static Logger logger = Logger.getLogger("MSConvert Service");
