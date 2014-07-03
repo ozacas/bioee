@@ -178,10 +178,12 @@ as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentati
     </complexType>
 
     <complexType name="AbsoluteThresholdType">
+    	<sequence>
+    		<element name="msLevels" type="tns:MsLevelType"></element>
+    	</sequence>
     	<attribute name="what">
     		<simpleType>
-    			<restriction base="tns:MostOrLeast">
-    			</restriction>
+    			<restriction base="tns:MostOrLeast"></restriction>
     		</simpleType>
     	</attribute>
     	<attribute name="intensity_threshold" type="double"></attribute>
@@ -195,6 +197,9 @@ as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentati
     </simpleType>
 
     <complexType name="RelativeThresholdType">
+    	<sequence>
+    		<element name="msLevels" type="tns:MsLevelType"></element>
+    	</sequence>
     	<attribute name="what" type="tns:MostOrLeast"></attribute>
     	<attribute name="fraction" type="double"></attribute>
     </complexType>
@@ -315,6 +320,7 @@ as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentati
     		<element name="preferVendor" type="boolean"></element>
     		<element name="msLevels" type="tns:MsLevelType"></element>
     	</sequence>
+    	<attribute name="fixMetadata" type="boolean"></attribute>
     </complexType>
 
 

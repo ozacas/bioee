@@ -55,11 +55,10 @@ public class ConversionJobThread implements Runnable {
 	public void run() {
     	try {
     		// msconvert has control over output files (and indeed whether multiple files are
-    		// produced) so we must cope with that. For now the webservice interface converts all samples
-    		// but only makes the first in a file available for download. FIXME TODO BUG
+    		// produced) so we must cope with that.
         	CommandLine cmdLine = new MSConvertCommandLineBuilder(msconvert_config).fromJob(job).build();
         	
-        	File out_folder = new TempDirectory("output_files", ".d", job.getDataFolder()).asFile();
+        	File out_folder = new TempDirectory("results", ".d", job.getDataFolder()).asFile();
 	    	logger.info("Created output folder: "+out_folder.getAbsolutePath());
 	    	
 	    	cmdLine.addArgument(out_folder.getName());
@@ -73,7 +72,7 @@ public class ConversionJobThread implements Runnable {
 			exitCode = exe.execute(cmdLine);
 			
 			if (exe.isFailure(exitCode)) {
-				throw new IOException("Invalid exit code from msconvert: "+exitCode);
+				throw new IOException("msconvert may have failed due to exit code: "+exitCode);
 	    	} 
 		
 			File[] out_files = out_folder.listFiles();
@@ -85,6 +84,7 @@ public class ConversionJobThread implements Runnable {
 			addResultsAndSend(job, out_files);
     	} catch (Exception e) {
     		try {
+    			e.printStackTrace();
     			addResultsAndSend(job, null);		// mark job as failed
     		} catch (Exception e2) {
     			e2.printStackTrace();
