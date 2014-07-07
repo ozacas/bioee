@@ -4,20 +4,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
+import javax.activation.DataHandler;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import au.edu.unimelb.plantcell.servers.core.jaxb.JobMessageType;
+import au.edu.unimelb.plantcell.servers.core.jaxb.ResultsType;
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
-import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.DataFileType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ProteowizardJobType;
 
 /**
@@ -34,19 +37,30 @@ public class MSConvertJob extends JobMessageType {
 	 * the data folder is associated with the job, so that when the job is purged it knows what to delete.
 	 * All files associated with the job are relative to this folder
 	 */
-	private File data_folder;
+	@XmlElement
+	private File data_folder;		// input data files are located within this folder
+	@XmlElement
+	private File output_folder;		// but the output_folder (for results of conversion/filtering) is also directly beneath data_folder
 	
-	public MSConvertJob() {
-		setDataFolder(null);
+	// only for use by JAXB
+	protected MSConvertJob() {
 	}
 	
-	public MSConvertJob(final ProteowizardJob job) throws IOException {
-		this();
-		assert(job != null);
-		saveData(job);
+	public MSConvertJob(final ProteowizardJob job, final DataHandler[] input_data_files, 
+			final File data_directory) throws IOException {
+		
 		this.setJobID(makeRandomUUID());
-		marshal(job);
-		this.setResults(null);
+		File temp_data_directory = new File(data_directory, getJobID()+"_data.d");
+		setandCreateDataFolder(temp_data_directory);
+		ResultsType rt = new ResultsType();
+		rt.setStatus("UNFINISHED");
+		setResults(rt);
+		assert(job != null);
+		saveData(job.getInputDataFormat(), job.getInputDataNames(), input_data_files);
+		marshal(job);		// invokes setInputParameters()
+		setResults(null);	// no results yet
+		// and finally make sure the output folder is created and ready for use...
+		setAndCreateOutputFolder(new File(temp_data_directory, "results"));
 	}
 	
 	/**
@@ -79,7 +93,7 @@ public class MSConvertJob extends JobMessageType {
 	private ProteowizardJob unmarshal() throws JAXBException,IOException {
 		JAXBContext jc = JAXBContext.newInstance(ProteowizardJob.class);
 		Unmarshaller m = jc.createUnmarshaller();
-		return (ProteowizardJob) m.unmarshal(new File(this.getInputParameters()));
+		return (ProteowizardJob) m.unmarshal(new URL(this.getInputParameters()));
 	}
 	
 	/**
@@ -88,37 +102,35 @@ public class MSConvertJob extends JobMessageType {
 	 * @param job is modified so that the data files are removed after it is persisted (WARNING: SIDE-EFFECT!)
 	 * @throws IOException
 	 */
-	private void saveData(final ProteowizardJob job) {
-		final List<String> urls = this.getInputData().getUrl();
-		urls.clear();
-		for (DataFileType dft : job.getDataFile()) {
-			FileOutputStream os = null;
+	private void saveData(final String data_format, final List<String> names, final DataHandler[] data) throws IOException {
+		if (data_format == null || names == null || data == null || data.length != names.size()) {
+			throw new IOException("Illegal/missing parameters to saveData()");
+		}
+		File data_folder = getDataFolder();
+		for (int i=0; i<names.size(); i++) {
+			String name = names.get(i);
+			DataHandler dh = data[i];
+			FileOutputStream fos = new FileOutputStream(new File(data_folder, name));
 			try {
-				File f = File.createTempFile("msconvert_input_data", "file.raw", getDataFolder());
-				setDataFolder(f.getParentFile());
-				os = new FileOutputStream(f);
-				dft.getData().writeTo(os);
-				urls.add(f.toURI().toURL().toExternalForm());
-			} catch (IOException e) {
-				e.printStackTrace();
+				dh.writeTo(fos);
 			} finally {
-				if (os != null) {
-					try {
-						os.close();
-					} catch (IOException e) {
-					}
-				}
+				fos.close();
 			}
 		}
-		job.getDataFile().clear();		// dont want to persist the original XML related to the input data now that it has been successfully copied to this
 	}
 	
-	public File getDataFolder() {
+	private File getDataFolder() {
 		return data_folder;
 	}
 	
-	public void setDataFolder(File data_folder) {
+	private synchronized void setandCreateDataFolder(File data_folder) throws IOException {
 		this.data_folder = data_folder;
+		if (data_folder.exists() && data_folder.isDirectory()) {
+			return;
+		}
+		if (!data_folder.mkdir()) {
+			throw new IOException("Cannot create data folder: "+data_folder.getAbsolutePath());
+		}
 	}
 
 	public static MSConvertJob unmarshal(final Reader rdr) throws JAXBException {
@@ -137,28 +149,23 @@ public class MSConvertJob extends JobMessageType {
 	}
 
 	/**
-	 * Return the local data URI for the specified input data file's UUID. In this way code is isolated from
-	 * having to know where/how the data is stored (only msconvert code needs to know for the purposes of the correct command line)
-	 * 
-	 * @param uuid
-	 * @return
+	 * Creates an output folder suitable for running msconvert. Must create it in the location
+	 * required by msconvert (see ConversionJobThread)
 	 */
-	public String getDataURI(final UUID uuid) {
-		assert(uuid != null);
-		
-		List<String> uris = inputData.getUrl();
-		List<String> ids  = inputData.getUuid();
-		if (uris.size() != ids.size()) {
-			// vectors must be the same size ie. every data file has a corresponding id...
-			return null;
-		}
-		for (int i=0; i<uris.size(); i++) {
-			UUID u = UUID.fromString(ids.get(i));
-			if (u.equals(uuid)) {
-				return uris.get(i);
-			}
-		}
-		return null;
+	private void setAndCreateOutputFolder(final File out) throws IOException {
+		output_folder = out;
+		out.mkdir();
+	}
+	
+	/**
+	 * MSConvert works best when the output folder is one-level buried relative to the input
+	 * data files. So we return a suitable folder (which has been created) for use. The caller
+	 * is responsible for deleting it at a suitable time
+	 * 
+	 * @return the output folder configured at construction time
+	 */
+	public File getOutputFolder() {
+		return output_folder;
 	}
 
 }

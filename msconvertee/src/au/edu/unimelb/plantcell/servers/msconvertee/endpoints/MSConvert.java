@@ -42,17 +42,26 @@ public interface MSConvert {
 	/**
 	 * Validates all parameters of the job and throws an exception if any invalid settings are detected.
 	 * Does no conversion. In theory, this should be queued as well as you could launch a denial of service attack
-	 * otherwise.
+	 * otherwise. Does not validate input data.
 	 */
 	public void validateJob(final ProteowizardJob job) throws SOAPException;
 	
 	/**
-	 * Submit and convert the supplied XCalibur (.raw) file from Thermo-Finnigan to mzML format. The conversion is
-	 * asynchronous: it will take time. So a jobID is returned for the caller to poll until COMPLETED (indicates successful conversion)
+	 * Submit and convert the supplied data files according to the specification in <code>job</code>. 
+	 * The conversion is asynchronous: it will take substantial time. So a jobID is returned for the 
+	 * caller to poll until COMPLETED (indicates successful conversion)
 	 * 
-	 * @param format one of mzML, mzXML or MGF
+	 * The caller must supply suitable filenames (incl. extension) via the job parameter in the same order
+	 * as the input_data_files list.
 	 */
-	public String convert(final ProteowizardJob job) throws SOAPException; 
+	public String convert(final ProteowizardJob job, final DataHandler[] input_data_files) throws SOAPException; 
+	
+	/**
+	 * Used for debugging/testing the command line argument building for the specified job. It returns the
+	 * command line rather than executing the specified job
+	 * @throws SOAPException if the job is not valid or a server mis-configuration
+	 */
+	public String debugConvert(final ProteowizardJob job, final DataHandler[] input_data_files) throws SOAPException;
 	
 	/**
 	 * Get job status - starts with one of [QUEUED, RUNNING, FAILED, ERROR, COMPLETED] with the rest of the

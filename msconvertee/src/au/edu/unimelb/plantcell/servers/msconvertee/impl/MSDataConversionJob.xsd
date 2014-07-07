@@ -6,10 +6,8 @@
     
     <complexType name="ProteowizardJobType">
     	<sequence>
-    		<element name="DataFile" type="tns:DataFileType"
-    			minOccurs="1" maxOccurs="unbounded">
-    		</element>
-    		<element name="OutputFormat" minOccurs="1" maxOccurs="1">
+    		<element name="OutputFormat" minOccurs="1" maxOccurs="1"
+    			default="MzML">
     			<simpleType>
     				<annotation>
     					<documentation>
@@ -29,21 +27,22 @@
     		<element name="FilterParameters"
     			type="tns:FilterParametersType" minOccurs="0" maxOccurs="1">
     		</element>
-    		<element name="Compression" type="tns:CompressionType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="Compression" type="tns:CompressionType"
+    			minOccurs="0" maxOccurs="1">
+    		</element>
     		<element name="PrecursorCorrection"
     			type="tns:PrecursorCorrectionType" minOccurs="0" maxOccurs="1">
     		</element>
-    	</sequence>
-    </complexType>
-
-    <complexType name="DataFileType">
-    	<sequence>
-    		<element name="order" type="int"></element>
-    		<element name="format">
+    		<element name="inputDataFormat" minOccurs="1"
+    			maxOccurs="1">
     			<annotation>
     				<documentation>
-    					Must be one of: Wiff, Raw, MGF, MzXML, MzML or
-    					MZ5
+    					Specify a single input data format. All files
+    					must be compatible with the stated format. The
+    					services supports only one conversion at a time.
+    					However, some file formats are broken across
+    					multiple files - in this case only the first
+    					file will appear on the msconvert command line.
     				</documentation>
     			</annotation>
     			<simpleType>
@@ -51,19 +50,21 @@
     					<enumeration value="wiff"></enumeration>
     					<enumeration value="raw"></enumeration>
     					<enumeration value="mgf"></enumeration>
-    					<enumeration value="mzxml"></enumeration>
     					<enumeration value="mzml"></enumeration>
+    					<enumeration value="mzxml"></enumeration>
     					<enumeration value="mz5"></enumeration>
     				</restriction>
     			</simpleType>
     		</element>
-    		<element name="suggestedName" type="string"></element>
-    		<element name="data" type="base64Binary"
-    			xmime:expectedContentTypes="application/octet-stream">
-    		</element>
-    		<element name="UUID" type="string"></element>
+    		<element name="inputDataNames" type="string" minOccurs="1" maxOccurs="unbounded">
+    			<annotation>
+    				<documentation>There must as many inputDataNames elements as there are data files supplied for a given conversion.
+
+ Any other exception will cause an exception to be thrown.</documentation>
+    			</annotation></element>
     	</sequence>
     </complexType>
+
 
     <complexType name="FilterParametersType">
     	<sequence>
@@ -353,5 +354,12 @@ as &lt;msLevel&gt;2&lt;/msLevel&gt;&lt;msLevel&gt;3&lt;/msLevel&gt;</documentati
     		</element>
     		<element name="timeFilter" type="tns:ScanTimeFilterType"></element>
     	</choice>
+    </complexType>
+
+    <complexType name="inputDataType">
+    	<sequence>
+    		<element name="data" type="base64Binary"></element>
+    		<element name="suggestedName" type="string"></element>
+    	</sequence>
     </complexType>
 </schema>

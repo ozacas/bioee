@@ -1,6 +1,7 @@
 package au.edu.unimelb.plantcell.servers.msconvertee.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -13,11 +14,14 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.jws.WebService;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.soap.SOAPException;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.soap.MTOM;
 import javax.xml.ws.soap.SOAPBinding;
+
+import org.apache.commons.exec.CommandLine;
 
 import au.edu.unimelb.plantcell.servers.core.AbstractWebService;
 import au.edu.unimelb.plantcell.servers.core.SendMessage;
@@ -52,15 +56,14 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	private String temp_folder;
 	
 	@Override
-	public String convert(final ProteowizardJob job) throws SOAPException {
+	public String convert(final ProteowizardJob job, @XmlMimeType("application/octet-stream")
+							final DataHandler[] input_data_files) throws SOAPException {
 		validateJob(job);
 		checkFreeStorageIsAvailable();
 		
 		// if we get here the job is do-able so....
 		try {
-			MSConvertJob         j = new MSConvertJob(job);
-        	File    temp_directory = new File(config.getTemporaryFileFolder(), "msconvert_output.dir");
-			j.setDataFolder(temp_directory);
+			MSConvertJob         j = new MSConvertJob(job, input_data_files, getTempDirectory());
 			// add to pending job queue
 			new SendMessage(logger, getConnectionFactory(), jobQueue, 0).send(j);
 			return j.getJobID();
@@ -69,6 +72,40 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 		}
 	}
 
+	@Override
+	public String debugConvert(final ProteowizardJob j, 
+						@XmlMimeType("application/octet-stream") final DataHandler[] input_data_files) 
+								throws SOAPException {
+		if (config == null) {
+			throw new SOAPException("No msconvert configuration!");
+		}
+		try {
+			// this code must match ConversionJobThread.run() for the tests to be accurate... ;)
+			MSConvertJob         job = new MSConvertJob(j, input_data_files, getTempDirectory());
+	    	CommandLine      cmdLine = new MSConvertCommandLineBuilder(config).
+	    								fromJob(job).
+	    								setOutputFolder(job.getOutputFolder()).build();
+	    	return cmdLine.toString();
+		} catch (IOException|JAXBException ioe) {
+			throw new SOAPException(ioe);
+		}
+	}
+	
+	/**
+	 * Synchronized to prevent multiple threads trying to create the folder at the same time
+	 * @return
+	 * @throws IOException
+	 */
+	private synchronized File getTempDirectory() throws IOException {
+    	File f = config.getTemporaryFileFolder();
+    	if (f.exists() && f.isDirectory()) {
+    		return f;
+    	}
+    	if (!f.mkdir()) {
+    		throw new IOException("Cannot create temporary data directory: "+f.getAbsolutePath());
+    	}
+    	return f;
+	}
 	@Override
 	public MSConvertFeature[] allFeatures() throws SOAPException {
 		return MSConvertFeature.values();

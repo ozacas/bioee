@@ -12,7 +12,9 @@
     		<element name="inputData" type="tns:inputDataType"></element>
     		<element name="inputParameters" type="anyURI">
     			<annotation>
-    				<documentation>Typically a file url used to obtain the XML job parameters. Required.</documentation>
+    				<documentation>Typically a file url used to obtain the XML job parameters. Required.
+    				The software will always interpret this field as a URL and not anything else.
+    				</documentation>
     			</annotation></element>
     		<element name="results" type="tns:resultsType"></element>
     	</sequence>
