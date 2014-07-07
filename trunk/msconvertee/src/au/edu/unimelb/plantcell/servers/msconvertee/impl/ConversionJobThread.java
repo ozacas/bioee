@@ -12,7 +12,6 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 
 import au.edu.unimelb.plantcell.servers.core.SendMessage;
-import au.edu.unimelb.plantcell.servers.core.TempDirectory;
 import au.edu.unimelb.plantcell.servers.core.jaxb.ObjectFactory;
 import au.edu.unimelb.plantcell.servers.core.jaxb.ResultsType;
 
@@ -50,21 +49,24 @@ public class ConversionJobThread implements Runnable {
 		this.job              = job;
 		this.connectionFactory= connectionFactory;
 		this.logger           = logger;
+		if (job.getInputData().getUrl().size() < 1) {
+			throw new IOException("No input data files to convert!");
+		}
 	}
 
 	public void run() {
     	try {
     		// msconvert has control over output files (and indeed whether multiple files are
     		// produced) so we must cope with that.
-        	CommandLine cmdLine = new MSConvertCommandLineBuilder(msconvert_config).fromJob(job).build();
+        	File out_folder = job.getOutputFolder();
+        	CommandLine cmdLine = new MSConvertCommandLineBuilder(msconvert_config).
+        								fromJob(job).
+        								setOutputFolder(out_folder).build();
         	
-        	File out_folder = new TempDirectory("results", ".d", job.getDataFolder()).asFile();
-	    	logger.info("Created output folder: "+out_folder.getAbsolutePath());
-	    	
-	    	cmdLine.addArgument(out_folder.getName());
+	    	logger.info("Storing msconvert results in: "+out_folder.getAbsolutePath());
 	    	DefaultExecutor exe = new DefaultExecutor();
 	    	exe.setExitValues(new int[] {0});
-	    	exe.setWorkingDirectory(job.getDataFolder());		// MUST be this for msconvert to work...
+	    	exe.setWorkingDirectory(out_folder);		// MUST be this for msconvert to work...
 	    	exe.setWatchdog(new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT));
 	    	int exitCode = -1;
 			

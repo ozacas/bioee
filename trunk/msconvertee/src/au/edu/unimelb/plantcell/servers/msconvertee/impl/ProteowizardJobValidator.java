@@ -1,6 +1,5 @@
 package au.edu.unimelb.plantcell.servers.msconvertee.impl;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +11,6 @@ import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.AbsoluteThresholdType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ActivationFilteringType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ChargeStateFilterType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.CompressionType;
-import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.DataFileType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.DeisotopeFilteringType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.EtdFilteringType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.FilterParametersType;
@@ -43,7 +41,7 @@ public class ProteowizardJobValidator {
 			throw new SOAPException("No job!");
 		}
 		validateOutputFormat(job.getOutputFormat());
-		validateInputData(job.getDataFile());
+		validateInputData(job.getInputDataFormat(), job.getInputDataNames());
 		validateCompression(job.getCompression());
 		validatePrecursor(job.getPrecursorCorrection());
 		validateFilters(job.getFilterParameters());
@@ -391,57 +389,22 @@ public class ProteowizardJobValidator {
 
 	/**
 	 * Check the data associated with the input data files to be converted
-	 * @param dataFiles
+	 * @param data_format
 	 * @throws SOAPException
 	 */
-	private void validateInputData(final List<DataFileType> dataFiles) throws SOAPException {
-		// only one conversion may be done per job. But one conversion may require several files (eg. wiff & wiff.scan)
-		// for some AB SciEx conversions. This is done to prevent someone hogging the queue by creating a job with 1000 files in it...
-		if (dataFiles == null || dataFiles.size() < 1) {
-			throw new SOAPException("No input data files!");
+	private void validateInputData(final String data_format, final List<String> list_of_filenames) throws SOAPException {
+		if (list_of_filenames == null || list_of_filenames.size() < 1) {
+			throw new SOAPException("Missing list of data files!");
 		}
-		HashMap<String,Integer> format_counts = new HashMap<String,Integer>();
-		for (DataFileType df : dataFiles) {
-			String fmt = df.getFormat().toLowerCase().trim();
-			validateInputDataFormat(fmt);
-			if (df.getSuggestedName() == null || df.getSuggestedName().length() < 1) {
-				throw new SOAPException("No suggested name!");
+		String lc = data_format.trim().toLowerCase();
+		if (lc.equals("wiff")) {
+			if (list_of_filenames.size() > 2) {
+				throw new SOAPException("Maximum of two files supported for conversion of WIFF files!");
 			}
-			Integer i = format_counts.get(fmt);
-			if (i == null) {
-				i = Integer.valueOf(1);
-			} else {
-				i = Integer.valueOf(i+1);
-			}
-			format_counts.put(fmt, i);
+		} else if (list_of_filenames.size() > 1) {
+			throw new SOAPException("Only a single file supported for conversion of "+lc+" files.");
 		}
-		
-		if (format_counts.size() != 1) {
-			throw new SOAPException("One file format must only be used per job!");
-		}
-		for (String s : format_counts.keySet()) {
-			if (s.equals("wiff") && format_counts.get(s).intValue() > 3) {
-				throw new SOAPException("Wiff conversions must have either 1 or 2 files");
-			} else if (format_counts.get(s).intValue() > 1) {
-				throw new SOAPException("Conversions from "+s+" must have exactly one input file!");
-			}
-		}
-	}
-
-	/**
-	 * check the input data file format for one of the supported types
-	 * @param fmt must be in lowercase
-	 * @throws SOAPException
-	 */
-	private void validateInputDataFormat(final String fmt) throws SOAPException {
-		if (fmt == null) {
-			throw new SOAPException("No input file format!");
-		}
-		if (fmt.equals("mgf") || fmt.equals("wiff") || fmt.equals("raw") || fmt.equals("mgf") ||
-				fmt.equals("mzxml") || fmt.equals("mzml") || fmt.equals("mz5")) {
-			return;
-		}
-		throw new SOAPException("Unknown/unsupported input data format: "+fmt);
+		// TODO FIXME... check filename string content for hackers...
 	}
 
 	private void validateOutputFormat(final String outFormat) throws SOAPException {

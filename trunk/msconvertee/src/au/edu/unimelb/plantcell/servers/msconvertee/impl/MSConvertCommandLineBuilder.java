@@ -1,8 +1,8 @@
 package au.edu.unimelb.plantcell.servers.msconvertee.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import javax.xml.bind.JAXBException;
 
@@ -11,7 +11,6 @@ import org.apache.commons.exec.CommandLine;
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.AbsoluteThresholdType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ActivationFilteringType;
-import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.DataFileType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.DeisotopeFilteringType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.EtdFilteringType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.FilterParametersType;
@@ -37,10 +36,12 @@ import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.WindowFilterType;
 public class MSConvertCommandLineBuilder {
 	private MSConvertJob    job;
 	private MSConvertConfig config;
+	private File output_folder;
 	
 	public MSConvertCommandLineBuilder(final MSConvertConfig conf) {
 		assert(conf != null);
 		this.config = conf;
+		this.output_folder = null;
 	}
 	
 	/**
@@ -58,9 +59,19 @@ public class MSConvertCommandLineBuilder {
 		if (cl == null) {
 			throw new IOException("No msconvert program available!");
 		}
+		
+		// output folder is always first in command line args list
+		if (output_folder != null) {
+			cl.addArgument("-o");
+			cl.addArgument(this.output_folder.getAbsolutePath());
+		}
 		ProteowizardJob conversion = job.asProteowizardJob();
+		// then output format
 		addOutputFormatOption(cl, conversion.getOutputFormat().toLowerCase());
-		addDataFiles(cl, conversion.getDataFile());
+		// input data files
+		addDataFiles(cl, conversion.getInputDataFormat(), conversion.getInputDataNames());
+		
+		// and any user configuration options
 		addFilters(cl, conversion.getFilterParameters());
 		addPrecursorCorrection(cl, conversion.getPrecursorCorrection());
 		return cl;
@@ -83,20 +94,33 @@ public class MSConvertCommandLineBuilder {
 		}
 	}
 
-	private void addDataFiles(final CommandLine cl, final List<DataFileType> input_files) throws IOException {
-		assert(input_files != null);		// NB: job has already been validated by the time we get here
+	/**
+	 * Adds input data files in a suitable format to the specified <code>CommandLine</code>
+	 * 
+	 * @param cl command line to add data files to
+	 * @param dataFormat list of input url's
+	 * @param namedFiles input data file format
+	 * @throws IOException
+	 */
+	private void addDataFiles(final CommandLine cl, final String dataFormat, final List<String> namedFiles) throws IOException {
+		assert(dataFormat != null);		// NB: job has already been validated by the time we get here
 		
-		// if there is only one file to be converted (the normal case) we just handle that here...
-		if (input_files.size() == 1) {
-			cl.addArgument(job.getDataURI(UUID.fromString(input_files.get(0).getUUID())));
-		} else if (input_files.size() > 1) {
-			String fmt = input_files.get(0).getFormat().trim().toLowerCase();
-			if (!fmt.equals("wiff")) {
-				throw new IOException("Only one data file may be supplied per job!");
+		int n = namedFiles.size();
+		if (n < 1) {
+			throw new IOException("No data files to add to command line!");
+		}
+		
+		if (dataFormat.equals("wiff")) {
+			for (String name : namedFiles) {
+				if (name.endsWith(".scan")) {
+					continue;
+				}
+				cl.addArgument("../"+name);
 			}
-			
 		} else {
-			throw new IOException("Only WIFF file conversion permits more than one input file");
+			for (String name : namedFiles) {
+				cl.addArgument("../"+name);
+			}
 		}
 	}
 
@@ -330,5 +354,10 @@ public class MSConvertCommandLineBuilder {
 		} else {
 			throw new IOException("Unsupported output format: "+outFormat);
 		}
+	}
+
+	public MSConvertCommandLineBuilder setOutputFolder(File out_folder) {
+		this.output_folder = out_folder;
+		return this;
 	}
 }
