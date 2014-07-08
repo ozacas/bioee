@@ -25,6 +25,7 @@ import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.RelativeThresholdType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ScanFilterType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ThresholdParametersType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.WindowFilterType;
+import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ZeroesFilterType;
 
 /**
  * Uses the builder design pattern to construct an instance of the CommandLine
@@ -63,7 +64,7 @@ public class MSConvertCommandLineBuilder {
 		// output folder is always first in command line args list
 		if (output_folder != null) {
 			cl.addArgument("-o");
-			cl.addArgument(this.output_folder.getAbsolutePath());
+			cl.addArgument(fixPath(output_folder));
 		}
 		ProteowizardJob conversion = job.asProteowizardJob();
 		// then output format
@@ -75,6 +76,15 @@ public class MSConvertCommandLineBuilder {
 		addFilters(cl, conversion.getFilterParameters());
 		addPrecursorCorrection(cl, conversion.getPrecursorCorrection());
 		return cl;
+	}
+
+	private String fixPath(final File f) throws IOException {
+		if (f == null) {
+			throw new IOException("File must not be null!");
+		}
+		String ret = f.getAbsolutePath();
+		ret = ret.replaceAll("\\\\", "/");
+		return ret;
 	}
 
 	private void addPrecursorCorrection(final CommandLine cl, final PrecursorCorrectionType pc) throws IOException {
@@ -159,6 +169,11 @@ public class MSConvertCommandLineBuilder {
 			cl.addArgument("--filter");
 			DeisotopeFilteringType dft = fpt.getDeisotopeFilter();
 			cl.addArgument("MS2Deisotope "+dft.isHires()+" "+dft.getMzTolerance());
+		}
+		if (fpt.getZeroesFilter() != null) {
+			cl.addArgument("--filter");
+			ZeroesFilterType zft = fpt.getZeroesFilter();
+			cl.addArgument("zeroSamples "+zft.getMode()+" "+asIntSet(zft.getApplyToMsLevel()));
 		}
 		if (fpt.getEtdFilter() != null) {
 			cl.addArgument("--filter");

@@ -121,6 +121,8 @@ public class MSConvertConfig {
 		if (proteowizard_msconvert == null) {
 			proteowizard_msconvert = "c:/Program Files (x86)/ProteoWizard/ProteoWizard 3.0.4416/msconvert.exe";
 		}
+		// ensure even windows uses forward slashes... what was bill gates thinking?
+		proteowizard_msconvert = proteowizard_msconvert.replaceAll("\\\\", "/");
 		File f = new File(proteowizard_msconvert);
 		if (!(f.exists() && f.canExecute())) {
 			return null;

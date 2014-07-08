@@ -1,7 +1,9 @@
 package au.edu.unimelb.plantcell.servers.msconvertee.impl;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -25,6 +27,10 @@ import org.apache.commons.exec.CommandLine;
 
 import au.edu.unimelb.plantcell.servers.core.AbstractWebService;
 import au.edu.unimelb.plantcell.servers.core.SendMessage;
+import au.edu.unimelb.plantcell.servers.core.TempDirectory;
+import au.edu.unimelb.plantcell.servers.core.jaxb.results.DataFileType;
+import au.edu.unimelb.plantcell.servers.core.jaxb.results.ListOfDataFile;
+import au.edu.unimelb.plantcell.servers.core.jaxb.results.ObjectFactory;
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvert;
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvertFeature;
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
@@ -55,11 +61,26 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	@Resource(name="TEMP_FOLDER")
 	private String temp_folder;
 	
+	/**
+	 * Checks internal and job state and throws if something is wrong with the input job specification
+	 * @param job must not be null
+	 * @throws SOAPException
+	 */
+	private void checkOkToRunJob(final ProteowizardJob job) throws SOAPException {
+		if (config == null) {
+			throw new SOAPException("No msconvert configuration!");
+		}
+		if (job == null) {
+			throw new SOAPException("No job to run!");
+		}
+		validateJob(job);
+		checkFreeStorageIsAvailable();
+	}
+	
 	@Override
 	public String convert(final ProteowizardJob job, @XmlMimeType("application/octet-stream")
 							final DataHandler[] input_data_files) throws SOAPException {
-		validateJob(job);
-		checkFreeStorageIsAvailable();
+		checkOkToRunJob(job);
 		
 		// if we get here the job is do-able so....
 		try {
@@ -76,9 +97,8 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	public String debugConvert(final ProteowizardJob j, 
 						@XmlMimeType("application/octet-stream") final DataHandler[] input_data_files) 
 								throws SOAPException {
-		if (config == null) {
-			throw new SOAPException("No msconvert configuration!");
-		}
+		checkOkToRunJob(j);
+		
 		try {
 			// this code must match ConversionJobThread.run() for the tests to be accurate... ;)
 			MSConvertJob         job = new MSConvertJob(j, input_data_files, getTempDirectory());
@@ -167,32 +187,25 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	}
 
 	@Override
-	public int getResultFileCount(String jobID) throws SOAPException {
+	public void purgeJobFiles(final String jobID) throws SOAPException {
 		String status = getStatus(jobID);
-		if (status != null && status.equals("FINISHED")) {
-			return 0;
+		if (! status.equals("FINISHED")) {
+			throw new SOAPException("Can only purge finished jobs: got status "+status+" for "+jobID);
 		}
-		throw new SOAPException("Job "+jobID+" is not valid!");
-	}
-
-	@Override
-	public @XmlMimeType("application/octet-stream") DataHandler getResultFile(String jobID, int file_index) {
-		return null;
-	}
-
-	@Override
-	public String getResultFilename(String jobID, int file_index) {
-		return "";
-	}
-
-	@Override 
-	public long getResultFilesize(String jobID, int file_index) {
-		return 0;
-	}
-
-	@Override
-	public void purgeJobFiles(String jobID) {
-		// TODO FIXME...
+		try {
+			File td = getTempDirectory();
+			String td_path = td.getAbsolutePath();
+			File f = MSConvertJob.getJobDirectory(jobID, td);
+			if (f == null || !f.isDirectory() || f.getAbsolutePath().indexOf("..") >= 0 || !f.getAbsolutePath().startsWith(td_path)) {
+				String msg = "Refusing to delete suspicious folder: "+f.getAbsolutePath();
+				logger.warning(msg);
+				throw new SOAPException(msg);
+			}
+			logger.info("deleting job folder: "+f.getAbsolutePath());
+			TempDirectory.deleteRecursive(f);
+		} catch (IOException ioe) {
+			throw new SOAPException(ioe);
+		}
 	}
 
 	@Override
@@ -216,5 +229,50 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 	@Override
 	protected Logger getLogger() {
 		return logger;
+	}
+
+	@Override
+	public ListOfDataFile getResults(final String jobID) throws SOAPException {
+		String status = getStatus(jobID);
+		if (!status.startsWith("FINISH")) {
+			throw new SOAPException("Can only retrieve results for finished jobs: "+status+" "+jobID);
+		}
+		try {
+			File folder = MSConvertJob.getJobDirectory(jobID, getTempDirectory());
+			if (folder.isDirectory()) {
+				final ObjectFactory of = new ObjectFactory();
+				final ListOfDataFile l = of.createListOfDataFile();
+				folder.listFiles(new FileFilter() {
+
+					@Override
+					public boolean accept(final File p) {
+						boolean accept = (p.isFile() && p.canRead());
+						if (accept) {
+							DataFileType df = of.createDataFileType();
+							df.setSuggestedName(p.getName());
+							df.setRequiredLength((int)p.length());
+							df.setIsOutputLog(p.getName().equals("stdout"));
+							df.setIsErrorLog(p.getName().equals("stderr"));
+							try {
+								df.setData(new DataHandler(p.toURI().toURL()));
+								l.getDataFile().add(df);
+							} catch (MalformedURLException e) {
+								e.printStackTrace();
+								return false;
+							}
+						}
+						return accept;
+					}
+					
+				});
+				
+				logger.info("Returning result comprising "+l.getDataFile().size()+ " data files.");
+				return l;
+			} else {
+				throw new SOAPException("No such job folder: "+folder.getAbsolutePath());
+			}
+		} catch (IOException ioe) {
+			throw new SOAPException(ioe);
+		}
 	}
 }

@@ -13,7 +13,6 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
@@ -101,10 +100,11 @@ public class SendMessage {
 	
 	protected String marshal_to_text(final JobMessageType msg) throws JAXBException, IOException {
 		StringWriter sw = new StringWriter();
-		JAXBContext  jc = JAXBContext.newInstance(JobMessageType.class); 
-		Marshaller    m = jc.createMarshaller();
+		Class<? extends JobMessageType> clz = msg.getClass();
+		JAXBContext   jc = JAXBContext.newInstance(clz); 
+		Marshaller     m = jc.createMarshaller();
 		ObjectFactory of = new ObjectFactory();
-		JAXBElement<JobMessageType> root = of.createJobMessage(msg);
+		Object      root = of.createJobMessage(msg);
 		m.marshal(root, sw);
 		sw.close();
 		return sw.toString();

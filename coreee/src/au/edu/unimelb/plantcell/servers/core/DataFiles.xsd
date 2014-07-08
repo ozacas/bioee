@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.plantcell.unimelb.edu.au/bioinformatics/schemas/v1/DataFiles" 
+		elementFormDefault="qualified" 
+		xmlns="http://www.w3.org/2001/XMLSchema" 
+		xmlns:tns="http://www.plantcell.unimelb.edu.au/bioinformatics/schemas/v1/DataFiles"
+		xmlns:xmime="http://www.w3.org/2005/05/xmlmime">
+
+    
+
+
+    <element name="DataFiles" type="tns:ListOfDataFile"></element>
+    
+    <complexType name="ListOfDataFile">
+    	<sequence>
+    		<element name="DataFile" type="tns:DataFileType" minOccurs="1" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="DataFileType">
+    	<sequence>
+    		<element name="data" type="base64Binary" minOccurs="1" 
+    				 maxOccurs="1" xmime:expectedContentTypes="application/octet-stream"></element>
+    	</sequence>
+    	<attribute name="requiredLength" type="int" use="required"></attribute>
+    	<attribute name="suggestedName" type="string" use="required"></attribute>
+    	<attribute name="isErrorLog" type="boolean" use="optional"></attribute>
+    	<attribute name="isOutputLog" type="boolean" use="optional"></attribute>
+    </complexType>
+</schema>
