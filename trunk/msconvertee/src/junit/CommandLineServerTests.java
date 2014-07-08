@@ -1,8 +1,8 @@
 package junit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -16,8 +16,10 @@ import org.junit.Test;
 
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.MSConvert;
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
+import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.DeisotopeFilteringType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.FilterParametersType;
 import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.MS2DenoiseType;
+import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ZeroesFilterType;
 
 /**
  * Tests that the expected commandlines are produced from many msconvert invocations, but does
@@ -27,8 +29,8 @@ import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.MS2DenoiseType;
  *
  */
 public class CommandLineServerTests {
-	private final static String LOCALHOST_SERVER = "http://localhost:8080/msconvertee/webservices/MSConvertImpl?wsdl";
-	private final static QName LOCALHOST_QNAME = 
+	protected final static String LOCALHOST_SERVER = "http://localhost:8080/msconvertee/webservices/MSConvertImpl?wsdl";
+	protected final static QName LOCALHOST_QNAME = 
 			new QName("http://impl.msconvertee.servers.plantcell.unimelb.edu.au/", "MSConvertImplService");
 	
 	private String runJob(ProteowizardJob j) throws Exception {
@@ -41,7 +43,7 @@ public class CommandLineServerTests {
 		return cmdLine;
 	}
 	
-	private File getBasicDataFile() {
+	protected File getBasicDataFile() {
 		return new File("/home/acassin/test/proteomics/PM12.mgf");
 	}
 
@@ -52,14 +54,15 @@ public class CommandLineServerTests {
 			assertEquals("mgf", job.getInputDataFormat());
 			assertEquals("mgf", job.getOutputFormat());
 			String cmdLine = runJob(job);
-			assertEquals(true, cmdLine.startsWith("/usr/local/msconvert/msconvert"));
+			assertEquals(true, cmdLine.startsWith("/usr/local/msconvert/msconvert")
+					|| cmdLine.startsWith("c:\\Program Files (x86)\\ProteoWizard\\ProteoWizard 3.0.4416\\msconvert.exe"));
 			assertEquals(true, cmdLine.endsWith("--mgf ../PM12.mgf"));
 		} catch (Exception e) {
 			fail("Must not throw exception!");
 		}
 	}
 
-	private ProteowizardJob makeBasicTest() throws MalformedURLException {
+	protected ProteowizardJob makeBasicTest() throws MalformedURLException {
 		ProteowizardJob job = new ProteowizardJob();
 		job.setOutputFormat("mgf");
 		job.setInputDataFormat("mgf");
@@ -68,7 +71,7 @@ public class CommandLineServerTests {
 		return job;
 	}
 	
-	private ProteowizardJob makeDenoiserTest() throws MalformedURLException {
+	protected ProteowizardJob makeDenoiserTest() throws MalformedURLException {
 		ProteowizardJob job = makeBasicTest();
 		FilterParametersType fpt = new FilterParametersType();
 		MS2DenoiseType denoiser = new MS2DenoiseType();
@@ -78,6 +81,17 @@ public class CommandLineServerTests {
 		fpt.setMs2Denoise(denoiser);
 		job.setFilterParameters(fpt);
 		return job;
+	}
+	
+	private ProteowizardJob makeDeisotoperTest() throws MalformedURLException {
+		ProteowizardJob j = makeBasicTest();
+		FilterParametersType fpt = new FilterParametersType();
+		DeisotopeFilteringType deisotoper = new DeisotopeFilteringType();
+		deisotoper.setHires(false);
+		deisotoper.setMzTolerance(0.25d);
+		fpt.setDeisotopeFilter(deisotoper);
+		j.setFilterParameters(fpt);
+		return j;
 	}
 	
 	@Test
@@ -92,8 +106,33 @@ public class CommandLineServerTests {
 			assertEquals(true, fpt.getMs2Denoise().isMultichargeFragmentRelaxation());
 			String cmdLine = runJob(job);
 			assertNotNull(cmdLine);
+			String denoiser_expected = "--filter \"MS2Denoise 6 30.0 true\"";
+			assertEquals(true, cmdLine.endsWith(denoiser_expected));
+				
+			// perform a basic deisotope
+			job = makeDeisotoperTest();
+			assertNotNull(job);
+			fpt = job.getFilterParameters();
+			assertNotNull(fpt);
+			DeisotopeFilteringType dft = fpt.getDeisotopeFilter();
+			assertEquals(false, dft.isHires());
+			assertEquals(new Double(0.25d), dft.getMzTolerance());
+			job.setFilterParameters(fpt);
+			cmdLine = runJob(job);
+			String deisotoper_expected = "--filter \"MS2Deisotope false 0.25\"";
+			//System.err.println(cmdLine);
+			assertEquals(true, cmdLine.endsWith(deisotoper_expected));
 			
-			System.err.println(cmdLine);
+			job = makeBasicTest();
+			FilterParametersType zero_samples_filter = new FilterParametersType();
+			ZeroesFilterType zft = new ZeroesFilterType();
+			zft.getApplyToMsLevel().add(new Integer(2));		// MS2 only
+			zft.setMode("removeExtra");
+			zero_samples_filter.setZeroesFilter(zft);
+			job.setFilterParameters(zero_samples_filter);
+			cmdLine = runJob(job);
+			//System.err.println(cmdLine);
+			assertEquals(true, cmdLine.endsWith("--filter \"zeroSamples removeExtra 2\""));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Must not throw!");

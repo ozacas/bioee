@@ -38,7 +38,7 @@ public class TempDirectory {
     
     public TempDirectory(File f) throws IOException {
             assert(f != null);
-            f.delete();             // HACK: race condition
+            f.delete();             // HACK BUG TODO FIXME: race condition
             if (!f.mkdir())
                     throw new IOException("Cannot create temporary directory");
             m_f = f;
@@ -59,7 +59,10 @@ public class TempDirectory {
             deleteRecursive(m_f);
     }
 
-    private void deleteRecursive(File file) throws IOException {
+    public static void deleteRecursive(File file) throws IOException {
+    		if (file == null) {
+    			throw new IOException("Nothing to delete!");
+    		}
             if (file.isDirectory()) {
 	            if(file.list().length==0){
 	               file.delete();

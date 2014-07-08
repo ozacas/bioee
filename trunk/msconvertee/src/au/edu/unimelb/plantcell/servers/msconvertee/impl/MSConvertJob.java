@@ -46,12 +46,24 @@ public class MSConvertJob extends JobMessageType {
 	protected MSConvertJob() {
 	}
 	
+	/**
+	 * Public constructor. Requires at least one data file!
+	 * @param job
+	 * @param input_data_files
+	 * @param data_directory
+	 * @throws IOException
+	 */
 	public MSConvertJob(final ProteowizardJob job, final DataHandler[] input_data_files, 
 			final File data_directory) throws IOException {
 		
-		this.setJobID(makeRandomUUID());
-		File temp_data_directory = new File(data_directory, getJobID()+"_data.d");
+		// 1. must be done first...
+		setJobID(makeRandomUUID());
+		
+		// 2. find temporary data folder for execution of job
+		File temp_data_directory = getJobDirectory(getJobID(), data_directory);
 		setandCreateDataFolder(temp_data_directory);
+		
+		// 3. establish initial state of superclass members
 		ResultsType rt = new ResultsType();
 		rt.setStatus("UNFINISHED");
 		setResults(rt);
@@ -61,6 +73,19 @@ public class MSConvertJob extends JobMessageType {
 		setResults(null);	// no results yet
 		// and finally make sure the output folder is created and ready for use...
 		setAndCreateOutputFolder(new File(temp_data_directory, "results"));
+	}
+	
+	/**
+	 * Compute the job temporary data folder for storing attachments, results and XML denoting the msconvert run.
+	 * Will be deleted either by the client or my a regularly scheduled job which cleans up the folder to avoid filling the disk.
+	 * 
+	 * @param jobID must not be null
+	 * @param temp_directory must not be null
+	 * @return 
+	 */
+	public static File getJobDirectory(final String jobID, final File temp_directory) {
+		assert(jobID != null);
+		return new File(temp_directory, jobID + "_data.d");
 	}
 	
 	/**

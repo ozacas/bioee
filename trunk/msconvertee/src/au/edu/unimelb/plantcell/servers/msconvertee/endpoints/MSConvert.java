@@ -4,8 +4,9 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlMimeType;
 import javax.xml.soap.SOAPException;
+
+import au.edu.unimelb.plantcell.servers.core.jaxb.results.ListOfDataFile;
 
 
 /**
@@ -67,36 +68,17 @@ public interface MSConvert {
 	 * Get job status - starts with one of [QUEUED, RUNNING, FAILED, ERROR, COMPLETED] with the rest of the
 	 * string possibly describing the nature of the problem.
 	 */
-	public String getStatus(String jobID) throws SOAPException;
+	public String getStatus(final String jobID) throws SOAPException;
 	
 	/**
-	 * Returns the number of result file(s) available, as produced by the conversion. Usually 1, but the
-	 * caller should iterate through them all. Always [0..getResultFileCount()-1]. Do not call this method
-	 * unless the conversion status is COMPLETED.
-	 */
-	public int getResultFileCount(String jobID) throws SOAPException;
-	
-	/**
-	 * Returns the name of the file (including extension) for the client to use
-	 */
-	public String getResultFilename(String jobID, int file_index) throws SOAPException;
-	
-	/**
-	 * Returns the size of the converted file (in bytes) for the caller to check that all bytes have been transferred (checksum maybe?).
-	 * Returns -1 on error or if the specified file does not exist.
-	 */
-	public long getResultFilesize(String jobID, int file_index) throws SOAPException;
-	
-	/**
-	 * Download the converted file, this will be deleted upon successful download. Results are only
-	 * available for jobs in the COMPLETED state and will be deleted automatically. It is highly recommended
-	 * to download the result for each conversion before beginning the next conversion (in case a new submission causes
-	 * the old job to be purged)
+	 * Returns an object representing all the result files, their expected file sizes and suggested names (as created
+	 * by msconvert) to help the client to populate its data store(s).
 	 * 
-	 * @param jobID the job to retrieve results for
-	 * @param file_index which file (if more than one during the conversion process) to retrieve
+	 * @param jobID
+	 * @return
+	 * @throws SOAPException if the job is not finished or some problem occurs
 	 */
-	public @XmlMimeType("application/octet-stream") DataHandler getResultFile(String jobID, int file_index) throws SOAPException;
+	public ListOfDataFile getResults(final String jobID) throws SOAPException;
 	
 	/**
 	 * Purge all result files for the specified job ID from the server. No results for the specified
@@ -104,5 +86,5 @@ public interface MSConvert {
 	 * it may not obey it at all. The server purges results entirely at its discretion: this call is a hint that the data
 	 * will not be required anymore. Consider it a friendly notification ;-)
 	 */
-	public void purgeJobFiles(String jobID) throws SOAPException;
+	public void purgeJobFiles(final String jobID) throws SOAPException;
 }
