@@ -396,6 +396,9 @@ public class ProteowizardJobValidator {
 		if (list_of_filenames == null || list_of_filenames.size() < 1) {
 			throw new SOAPException("Missing list of data files!");
 		}
+		if (data_format == null) {
+			throw new SOAPException("No input data format eg. MGF supplied!");
+		}
 		String lc = data_format.trim().toLowerCase();
 		if (lc.equals("wiff")) {
 			if (list_of_filenames.size() > 2) {
