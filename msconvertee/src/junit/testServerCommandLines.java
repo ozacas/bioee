@@ -69,7 +69,13 @@ public class testServerCommandLines {
 	}
 	
 	protected File getBasicDataFile() {
-		return new File("/home/acassin/test/proteomics/PM12.mgf");
+		File f = new File("/home/acassin/test/proteomics/PM12.mgf");
+		if (!f.exists()) {
+			f = new File("c:/work/test files/proteomics/PM12.mgf");
+			return f;
+		} else {
+			return f;
+		}
 	}
 
 	private int countPeakLists(final File mgf, final Set<String> spectra_titles) {
@@ -123,7 +129,8 @@ public class testServerCommandLines {
 			assertEquals("mgf", job.getOutputFormat());
 			String cmdLine = runDebugConvertJob(job);
 			assertEquals(true, cmdLine.startsWith("/usr/local/msconvert/msconvert")
-					|| cmdLine.startsWith("c:\\Program Files (x86)\\ProteoWizard\\ProteoWizard 3.0.4416\\msconvert.exe"));
+					|| cmdLine.startsWith("c:\\Program Files (x86)\\ProteoWizard\\ProteoWizard 3.0.4416\\msconvert.exe")||
+					cmdLine.startsWith("c:\\Program Files (x86)\\ProteoWizard\\ProteoWizard 3.0.6485\\msconvert.exe"));
 			assertEquals(true, cmdLine.endsWith("--mgf ../PM12.mgf"));
 		} catch (Exception e) {
 			fail("Must not throw exception!");
