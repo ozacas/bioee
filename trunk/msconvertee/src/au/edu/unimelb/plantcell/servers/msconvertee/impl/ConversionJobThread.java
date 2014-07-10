@@ -104,6 +104,7 @@ public class ConversionJobThread implements Runnable {
 		SendMessage   sm = new SendMessage(logger, connectionFactory, doneQueue, 48 * 60 * 60);		// keep in completed queue for a maximum of 2 days
 		ObjectFactory of = new ObjectFactory();
 		ResultsType   rt = of.createResultsType();
+		rt.setOutputData(of.createOutputDataType());
 		if (out_files != null) {
 			rt.setStatus("OK");
 			for (File f : out_files) {

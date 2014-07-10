@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import au.edu.unimelb.plantcell.servers.core.jaxb.InputDataType;
 import au.edu.unimelb.plantcell.servers.core.jaxb.JobMessageType;
 import au.edu.unimelb.plantcell.servers.core.jaxb.ResultsType;
 import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
@@ -135,13 +137,26 @@ public class MSConvertJob extends JobMessageType {
 		for (int i=0; i<names.size(); i++) {
 			String name = names.get(i);
 			DataHandler dh = data[i];
-			FileOutputStream fos = new FileOutputStream(new File(data_folder, name));
+			File out = new File(data_folder, name);
+			FileOutputStream fos = new FileOutputStream(out);
 			try {
 				dh.writeTo(fos);
 			} finally {
 				fos.close();
 			}
+			
+			// careful of namespace pollution, we want the superclass'es InputDataType
+			InputDataType idt = new InputDataType();
+			addInputDataFile(idt, out);
+			this.setInputData(idt);
 		}
+	}
+	
+	private void addInputDataFile(final InputDataType idt, 
+									final File f) throws MalformedURLException {
+		assert(idt != null);
+		idt.getUrl().add(f.toURI().toURL().toExternalForm());
+		idt.getUuid().add(this.makeRandomUUID());
 	}
 	
 	private File getDataFolder() {

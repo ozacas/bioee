@@ -220,12 +220,7 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 		}
 		return connectionFactory;
 	}
-
-	@Override
-	protected String getMessageIDPropertyName() {
-		return MSConvertConstants.MSCONVERT_MESSAGE_ID_PROPERTY;
-	}
-
+	
 	@Override
 	protected Logger getLogger() {
 		return logger;
@@ -238,11 +233,13 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 			throw new SOAPException("Can only retrieve results for finished jobs: "+status+" "+jobID);
 		}
 		try {
-			File folder = MSConvertJob.getJobDirectory(jobID, getTempDirectory());
-			if (folder.isDirectory()) {
+			File job_folder = MSConvertJob.getJobDirectory(jobID, getTempDirectory());
+			File results_folder = new File(job_folder, "results");
+			logger.info("Scanning "+results_folder+" for suitable result files for job: "+jobID);
+			if (results_folder.isDirectory()) {
 				final ObjectFactory of = new ObjectFactory();
 				final ListOfDataFile l = of.createListOfDataFile();
-				folder.listFiles(new FileFilter() {
+				results_folder.listFiles(new FileFilter() {
 
 					@Override
 					public boolean accept(final File p) {
@@ -255,6 +252,7 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 							df.setIsErrorLog(p.getName().equals("stderr"));
 							try {
 								df.setData(new DataHandler(p.toURI().toURL()));
+								logger.info("Added "+p.getAbsolutePath()+" to results for "+jobID);
 								l.getDataFile().add(df);
 							} catch (MalformedURLException e) {
 								e.printStackTrace();
@@ -269,7 +267,7 @@ public class MSConvertImpl extends AbstractWebService implements MSConvert {
 				logger.info("Returning result comprising "+l.getDataFile().size()+ " data files.");
 				return l;
 			} else {
-				throw new SOAPException("No such job folder: "+folder.getAbsolutePath());
+				throw new SOAPException("No such job folder: "+results_folder.getAbsolutePath());
 			}
 		} catch (IOException ioe) {
 			throw new SOAPException(ioe);

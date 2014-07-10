@@ -28,7 +28,7 @@ import au.edu.unimelb.plantcell.servers.msconvertee.jaxb.ZeroesFilterType;
  * @author acassin
  *
  */
-public class CommandLineServerTests {
+public class testServerCommandLines {
 	protected final static String LOCALHOST_SERVER = "http://localhost:8080/msconvertee/webservices/MSConvertImpl?wsdl";
 	protected final static QName LOCALHOST_QNAME = 
 			new QName("http://impl.msconvertee.servers.plantcell.unimelb.edu.au/", "MSConvertImplService");
@@ -95,7 +95,7 @@ public class CommandLineServerTests {
 	}
 	
 	@Test
-	public void filterTests() {
+	public void denoiseTestSuccessful() {
 		try {
 			ProteowizardJob job = makeDenoiserTest();
 			assertNotNull(job);
@@ -108,34 +108,48 @@ public class CommandLineServerTests {
 			assertNotNull(cmdLine);
 			String denoiser_expected = "--filter \"MS2Denoise 6 30.0 true\"";
 			assertEquals(true, cmdLine.endsWith(denoiser_expected));
-				
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Must not throw!");
+		}
+	}
+	
+	@Test
+	public void deisotopeTestSuccessful() {
+		try {
 			// perform a basic deisotope
-			job = makeDeisotoperTest();
+			ProteowizardJob job = makeDeisotoperTest();
 			assertNotNull(job);
-			fpt = job.getFilterParameters();
+			FilterParametersType fpt = job.getFilterParameters();
 			assertNotNull(fpt);
 			DeisotopeFilteringType dft = fpt.getDeisotopeFilter();
 			assertEquals(false, dft.isHires());
 			assertEquals(new Double(0.25d), dft.getMzTolerance());
 			job.setFilterParameters(fpt);
-			cmdLine = runJob(job);
+			String cmdLine = runJob(job);
 			String deisotoper_expected = "--filter \"MS2Deisotope false 0.25\"";
 			//System.err.println(cmdLine);
 			assertEquals(true, cmdLine.endsWith(deisotoper_expected));
-			
-			job = makeBasicTest();
+		} catch (Exception e) {
+			fail("Must not throw!");
+		}
+	}
+	
+	@Test
+	public void zeroSampleTestSuccessful() {
+		try {
+			ProteowizardJob job = makeBasicTest();
 			FilterParametersType zero_samples_filter = new FilterParametersType();
 			ZeroesFilterType zft = new ZeroesFilterType();
 			zft.getApplyToMsLevel().add(new Integer(2));		// MS2 only
 			zft.setMode("removeExtra");
 			zero_samples_filter.setZeroesFilter(zft);
 			job.setFilterParameters(zero_samples_filter);
-			cmdLine = runJob(job);
+			String cmdLine = runJob(job);
 			//System.err.println(cmdLine);
 			assertEquals(true, cmdLine.endsWith("--filter \"zeroSamples removeExtra 2\""));
 		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Must not throw!");
+			fail("Must not fail!");
 		}
 	}
 }

@@ -5,11 +5,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.activation.DataHandler;
-import javax.xml.soap.SOAPException;
 import javax.xml.ws.Service;
 
 import org.junit.Test;
@@ -25,26 +23,22 @@ import au.edu.unimelb.plantcell.servers.msconvertee.endpoints.ProteowizardJob;
  * @author acassin
  *
  */
-public class getResults extends CommandLineServerTests {
+public class denoiseDownloadTest extends testServerCommandLines {
 	public final static String PRODUCTION_SERVER = "http://localhost:7070/msconvertee/webservices/MSConvertImpl?wsdl";
 	
 	@Test
 	public void getResultsTest() {
 		try {
 			ProteowizardJob j = makeDenoiserTest();
-			Service         s = Service.create(new URL(PRODUCTION_SERVER), LOCALHOST_QNAME);
+			Service         s = Service.create(new URL(LOCALHOST_SERVER), LOCALHOST_QNAME);
 			assertNotNull(s);
 			MSConvert     msc = s.getPort(MSConvert.class);
 			File f = getBasicDataFile();
 			DataHandler    dh = new DataHandler(f.toURI().toURL());
 			String      jobID = msc.convert(j, new DataHandler[] {dh});
 			assertNotNull(jobID);
-			String status;
-			do {
-				Thread.sleep(30 * 1000);
-				status = msc.getStatus(jobID);
-				assertNotNull(status);
-			} while (status.equals("QUEUED") || status.equals("RUNNING"));
+			assertTrue(waitForCompletion(msc, jobID, "FINISHED"));
+			
 			ListOfDataFile l = msc.getResults(jobID);
 			assertNotNull(l);
 			assertTrue(l.getDataFile().size() > 0);		// at least the converted mgf should be available
@@ -55,12 +49,20 @@ public class getResults extends CommandLineServerTests {
 				// noise removal should make the results shorter than the input, so check that...
 				assertTrue(df.getRequiredLength() < f.length());
 			}
-		} catch (MalformedURLException|SOAPException e) {
+		} catch (Exception e) {
 			fail("Must not throw!");
-		} catch (InterruptedException e) {
-			fail("Interrupted!");
 		}
-		
-		
+	}
+
+	private boolean waitForCompletion(final MSConvert msc, final String jobID, String expected_final_state) throws Exception {
+		String status;
+		do {
+			System.out.println("Waiting for 30s");
+			Thread.sleep(30 * 1000);
+			status = msc.getStatus(jobID);
+			assertNotNull(status);
+			System.out.println("Got status "+status);
+		} while (status.equals("QUEUED") || status.equals("RUNNING"));
+		return status.equals(expected_final_state);
 	}
 }
