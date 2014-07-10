@@ -39,6 +39,7 @@ public class denoiseDownloadTest extends testServerCommandLines {
 			assertNotNull(l);
 			assertTrue(l.getDataFile().size() > 0);		// at least the converted mgf should be available
 			for (DataFileType df : l.getDataFile()) {
+				System.err.println(df.getSuggestedName()+" has "+df.getRequiredLength()+" bytes.");
 				assertNotNull(df.getRequiredLength());
 				assertTrue(df.getRequiredLength() > 0);
 				assertNotNull(df.getSuggestedName());
