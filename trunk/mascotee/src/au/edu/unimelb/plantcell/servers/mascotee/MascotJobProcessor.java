@@ -78,7 +78,7 @@ public class MascotJobProcessor implements MessageListener {
 				 * Note we start a separate thread since we must return from this function quickly to acknowledge delivery of the message.
 				 * If we dont, we could incur a transaction timeout and lose messages...
 				 */
-				logger.info("Adding mascot job to run queue: "+message.getStringProperty(MascotEEConstants.MASCOTEE_ID_PROPERTY));
+				logger.info("Adding mascot job to run queue: "+job.getJobID());
 				/*
 	    		 * must put the message in the runQueue BEFORE we return from this or the web service wont know about the job.
 	    		 * Message does not expire after a set period in the runQueue (0)

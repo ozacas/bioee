@@ -31,7 +31,6 @@ import au.edu.unimelb.plantcell.servers.core.AbstractWebService;
 import au.edu.unimelb.plantcell.servers.core.SendMessage;
 import au.edu.unimelb.plantcell.servers.jaxb.mascotee.Search;
 import au.edu.unimelb.plantcell.servers.mascot.core.v2.MascotConfig;
-import au.edu.unimelb.plantcell.servers.mascotee.MascotEEConstants;
 import au.edu.unimelb.plantcell.servers.mascotee.MascotJob;
 import au.edu.unimelb.plantcell.servers.mascotee.SearchValidator;
 import au.edu.unimelb.plantcell.servers.mascotee.endpoints.DatFileService;
@@ -296,11 +295,6 @@ public class SearchServiceImpl extends AbstractWebService implements SearchServi
 			throw new SOAPException("No connection to broker!");
 		}
 		return connectionFactory;
-	}
-
-	@Override
-	protected String getMessageIDPropertyName() {
-		return MascotEEConstants.MASCOTEE_ID_PROPERTY;
 	}
 
 	@Override
