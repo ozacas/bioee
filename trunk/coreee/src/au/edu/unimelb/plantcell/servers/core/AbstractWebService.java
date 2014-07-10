@@ -32,22 +32,26 @@ public abstract class AbstractWebService {
 		
 		Connection connection = null;
 		Session       session = null;
+		Logger logger = getLogger();
+
 		try {
 			connection = getConnectionFactory().createConnection();
 			connection.start();
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			QueueBrowser        qb = session.createBrowser(q);
 			Enumeration<Message> e = qb.getEnumeration();
+			String propName = SendMessage.getJobIDPropertyName();		// HACK TODO BUG FIXME
 			while (e.hasMoreElements()) {
 				Message m = e.nextElement();
-				String id = m.getStringProperty(getMessageIDPropertyName());
+				String id = m.getStringProperty(propName);
 				//logger.info(id+ " : "+msgID);
 				if (msgID.equals(id) && m instanceof TextMessage) {
-					Logger logger = getLogger();
 					if (logger != null) {
 						logger.info("Found message for "+msgID+" in q: "+q.getQueueName());
 					}
 					return (TextMessage) m;
+				} else if (id == null && logger != null) {
+					logger.warning("No jobID in message: "+propName);
 				}
 			}
 			//logger.warning("Failed to find mascot job for: "+msgID);
@@ -99,17 +103,10 @@ public abstract class AbstractWebService {
 	/**
 	 * Returns a ConnectionFactory which is used by {@link #findMessage(Queue, String)}
 	 * 
-	 * @return must not be null, unless {@link findMessage} is also overriden
+	 * @return must not be null, unless {@link #findMessage(Queue, String)} is also overriden
 	 * @throws SOAPException
 	 */
 	protected abstract ConnectionFactory getConnectionFactory() throws SOAPException;
-	
-	/**
-	 * Returns a property name which must be present in the message which provides the ID to be used
-	 * for comparison in {@link #findMessage(Queue, String)}
-	 * @return
-	 */
-	protected abstract String getMessageIDPropertyName();
 	
 	/**
 	 * A logger instance which is used by {@link #findMessage(Queue, String)}

@@ -17,7 +17,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import au.edu.unimelb.plantcell.servers.core.jaxb.JobMessageType;
-import au.edu.unimelb.plantcell.servers.core.jaxb.ObjectFactory;
 
 /**
  * Abstraction to avoid all the ugly exception handling elsewhere in the code
@@ -73,6 +72,7 @@ public class SendMessage {
 				producer.setTimeToLive(expire * 1000); // all messages sent to queue expire after constructor set limit
 			}
 			TextMessage tm = session.createTextMessage(marshal_to_text(msg_to_send));
+			tm.setStringProperty(getJobIDPropertyName(), msg_to_send.getJobID());
 			if (mi != null) {
 				mi.interceptBeforeSend(msg_to_send, tm);
 			}
@@ -103,9 +103,7 @@ public class SendMessage {
 		Class<? extends JobMessageType> clz = msg.getClass();
 		JAXBContext   jc = JAXBContext.newInstance(clz); 
 		Marshaller     m = jc.createMarshaller();
-		ObjectFactory of = new ObjectFactory();
-		Object      root = of.createJobMessage(msg);
-		m.marshal(root, sw);
+		m.marshal(msg, sw);
 		sw.close();
 		return sw.toString();
 	}
@@ -114,6 +112,10 @@ public class SendMessage {
 		return DeliveryMode.NON_PERSISTENT;
 	}
 
+	public static String getJobIDPropertyName() {
+		return "COREEE_JOB_ID";
+	}
+	
 	public int getAcknowledgementMethod() {
 		return Session.AUTO_ACKNOWLEDGE;
 	}
