@@ -5,10 +5,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.net.URL;
 
 import javax.activation.DataHandler;
-import javax.xml.ws.Service;
 
 import org.junit.Test;
 
@@ -30,9 +28,7 @@ public class denoiseDownloadTest extends testServerCommandLines {
 	public void getResultsTest() {
 		try {
 			ProteowizardJob j = makeDenoiserTest();
-			Service         s = Service.create(new URL(LOCALHOST_SERVER), LOCALHOST_QNAME);
-			assertNotNull(s);
-			MSConvert     msc = s.getPort(MSConvert.class);
+			MSConvert msc = makeServiceProxy(LOCALHOST_SERVER, LOCALHOST_QNAME);
 			File f = getBasicDataFile();
 			DataHandler    dh = new DataHandler(f.toURI().toURL());
 			String      jobID = msc.convert(j, new DataHandler[] {dh});
@@ -52,17 +48,5 @@ public class denoiseDownloadTest extends testServerCommandLines {
 		} catch (Exception e) {
 			fail("Must not throw!");
 		}
-	}
-
-	private boolean waitForCompletion(final MSConvert msc, final String jobID, String expected_final_state) throws Exception {
-		String status;
-		do {
-			System.out.println("Waiting for 30s");
-			Thread.sleep(30 * 1000);
-			status = msc.getStatus(jobID);
-			assertNotNull(status);
-			System.out.println("Got status "+status);
-		} while (status.equals("QUEUED") || status.equals("RUNNING"));
-		return status.equals(expected_final_state);
 	}
 }

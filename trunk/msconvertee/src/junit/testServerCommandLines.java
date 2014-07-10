@@ -2,11 +2,17 @@ package junit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.activation.DataHandler;
 import javax.xml.namespace.QName;
@@ -33,12 +39,31 @@ public class testServerCommandLines {
 	protected final static QName LOCALHOST_QNAME = 
 			new QName("http://impl.msconvertee.servers.plantcell.unimelb.edu.au/", "MSConvertImplService");
 	
-	private String runJob(ProteowizardJob j) throws Exception {
-		Service s =Service.create(new URL(LOCALHOST_SERVER), LOCALHOST_QNAME);
+
+	protected MSConvert makeServiceProxy(String hostname, final QName namespace) throws MalformedURLException {
+		Service         s = Service.create(new URL(hostname), namespace);
 		assertNotNull(s);
-		MSConvert            msc = s.getPort(MSConvert.class);
+		MSConvert     msc = s.getPort(MSConvert.class);
+		assertNotNull(msc);
+		return msc;
+	}
+	
+	protected boolean waitForCompletion(final MSConvert msc, final String jobID, String expected_final_state) throws Exception {
+		String status;
+		do {
+			System.out.println("Waiting for 30s");
+			Thread.sleep(30 * 1000);
+			status = msc.getStatus(jobID);
+			assertNotNull(status);
+			System.out.println("Got status "+status);
+		} while (status.equals("QUEUED") || status.equals("RUNNING"));
+		return status.equals(expected_final_state);
+	}
+	
+	protected String runDebugConvertJob(ProteowizardJob j) throws Exception {
+		MSConvert  msc = makeServiceProxy(LOCALHOST_SERVER, LOCALHOST_QNAME);
 		DataHandler dh = new DataHandler(getBasicDataFile().toURI().toURL());
-		String           cmdLine = msc.debugConvert(j, new DataHandler[] {dh});
+		String cmdLine = msc.debugConvert(j, new DataHandler[] {dh});
 		assertNotNull(cmdLine);
 		return cmdLine;
 	}
@@ -47,13 +72,56 @@ public class testServerCommandLines {
 		return new File("/home/acassin/test/proteomics/PM12.mgf");
 	}
 
+	private int countPeakLists(final File mgf, final Set<String> spectra_titles) {
+		int ret = 0;
+		try {
+			BufferedReader rdr = new BufferedReader(new FileReader(mgf));
+			String line;
+			int end = 0;
+			while ((line = rdr.readLine()) != null) {
+				if (line.matches("^BEGIN\\s+IONS\\s*$")) {
+					ret++;
+				} else if (line.matches("^END\\s+IONS\\s*$")) {
+					end++;
+				} else if (line.startsWith("TITLE=")) {
+					spectra_titles.add(line.substring("TITLE=".length()));
+				}
+			}
+			assertTrue(ret == end);
+			rdr.close();
+		} catch (IOException e) {
+			fail("Cannot read: "+mgf.getAbsolutePath());
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * 
+	 * @param data_format Only supports mgf files for now
+	 * @param in		  input file before conversion/filtering
+	 * @param out		  output file after conversion/filtering
+	 */
+	protected void checkAllInputSpectraPresent(final String data_format, final File in, final File out) {
+		assertTrue(data_format.equals("mgf"));
+		
+		HashSet<String> input_titles = new HashSet<String>();
+		HashSet<String> output_titles= new HashSet<String>();
+		int in_peaklists = countPeakLists(in, input_titles);
+		int out_peaklists= countPeakLists(out, output_titles);
+		assertTrue(in_peaklists == out_peaklists);
+		for (String title : input_titles) {
+			assertTrue(output_titles.contains(title));
+		}
+	}
+	
 	@Test
 	public void serverConnectivityTest() {
 		try {
 			ProteowizardJob job = makeBasicTest();
 			assertEquals("mgf", job.getInputDataFormat());
 			assertEquals("mgf", job.getOutputFormat());
-			String cmdLine = runJob(job);
+			String cmdLine = runDebugConvertJob(job);
 			assertEquals(true, cmdLine.startsWith("/usr/local/msconvert/msconvert")
 					|| cmdLine.startsWith("c:\\Program Files (x86)\\ProteoWizard\\ProteoWizard 3.0.4416\\msconvert.exe"));
 			assertEquals(true, cmdLine.endsWith("--mgf ../PM12.mgf"));
@@ -104,7 +172,7 @@ public class testServerCommandLines {
 			assertEquals(new Integer(6), fpt.getMs2Denoise().getPeaksInWindow());
 			assertEquals(new Double(30.0d), fpt.getMs2Denoise().getWindowWidth());
 			assertEquals(true, fpt.getMs2Denoise().isMultichargeFragmentRelaxation());
-			String cmdLine = runJob(job);
+			String cmdLine = runDebugConvertJob(job);
 			assertNotNull(cmdLine);
 			String denoiser_expected = "--filter \"MS2Denoise 6 30.0 true\"";
 			assertEquals(true, cmdLine.endsWith(denoiser_expected));
@@ -126,7 +194,7 @@ public class testServerCommandLines {
 			assertEquals(false, dft.isHires());
 			assertEquals(new Double(0.25d), dft.getMzTolerance());
 			job.setFilterParameters(fpt);
-			String cmdLine = runJob(job);
+			String cmdLine = runDebugConvertJob(job);
 			String deisotoper_expected = "--filter \"MS2Deisotope false 0.25\"";
 			//System.err.println(cmdLine);
 			assertEquals(true, cmdLine.endsWith(deisotoper_expected));
@@ -145,7 +213,7 @@ public class testServerCommandLines {
 			zft.setMode("removeExtra");
 			zero_samples_filter.setZeroesFilter(zft);
 			job.setFilterParameters(zero_samples_filter);
-			String cmdLine = runJob(job);
+			String cmdLine = runDebugConvertJob(job);
 			//System.err.println(cmdLine);
 			assertEquals(true, cmdLine.endsWith("--filter \"zeroSamples removeExtra 2\""));
 		} catch (Exception e) {
