@@ -209,7 +209,13 @@ public class MSConvertConfig {
 		DefaultExecutor exe = new DefaultExecutor();
 		
 		exe.setExitValues(new int[] {0});
-    	exe.setWorkingDirectory(getTemporaryFileFolder());
+		File tmp_folder = getTemporaryFileFolder();
+		if (!tmp_folder.exists()) {
+			if (!tmp_folder.mkdir()) {
+				throw new IOException("Cannot create temporary folder: "+tmp_folder.getAbsolutePath());
+			}
+		}
+    	exe.setWorkingDirectory(tmp_folder);
     	exe.setWatchdog(new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT));
     	StringBuffer stdout = new StringBuffer();
     	OutputStream out = new StringBufferOutputStream(stdout);
