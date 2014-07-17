@@ -111,16 +111,28 @@ public class MSConvertConfig {
 	}
 
 	/**
+	 * Retrieves the root folder and resiliently as possible
+	 */
+	public String getRootFolder() {
+		String root = msconvert_path;
+		
+		// HACK BUG FIXME: try to find the program if not configured correctly (not likely to work!)
+		if (root == null) {
+			root = "c:/Program Files (x86)/ProteoWizard/ProteoWizard 3.0.6485/";
+		}
+		
+		return root;
+	}
+	
+	/**
 	 * We dont give out the location of the msconvert binary directly, but rather return a pre-instantiated
 	 * binary here. For which the path corresponds to this objects state.
 	 * 
 	 * @return
 	 */
 	public CommandLine getCommandLine() {
-		String proteowizard_msconvert = msconvert_path;
-		if (proteowizard_msconvert == null) {
-			proteowizard_msconvert = "c:/Program Files (x86)/ProteoWizard/ProteoWizard 3.0.4416/msconvert.exe";
-		}
+		String proteowizard_msconvert = getRootFolder()+"/msconvert.exe";		// .exe even on non-windows platforms
+	
 		// ensure even windows uses forward slashes... what was bill gates thinking?
 		proteowizard_msconvert = proteowizard_msconvert.replaceAll("\\\\", "/");
 		File f = new File(proteowizard_msconvert);
@@ -137,6 +149,9 @@ public class MSConvertConfig {
 		}
 		supported_features.clear();
 		dirty = false;
+		
+		// check the msconvert bin folder for the presence of vendor-specific dll's
+		checkVendorSpecificSupport();
 		
 		// we run msconvert to get the supported options into the config state. By doing this at runtime 
 		// we can then validate the user-supplied options against the server's capabilities
@@ -177,6 +192,25 @@ public class MSConvertConfig {
 		}
 	}
 	
+	private void checkVendorSpecificSupport() {
+		File root = new File(getRootFolder());
+		if (root.exists() && root.isDirectory()) {
+			File analyst_rdr = new File(root, "Clearcore2.Data.WiffReader.dll");
+			if (analyst_rdr.exists() && analyst_rdr.canRead()) {
+				supported_features.add(MSConvertFeature.VENDOR_WIFF);
+			}
+			File thermo_rdr = new File(root, "MSFileReader.XRawFile2.dll");
+			if (thermo_rdr.exists() && thermo_rdr.canRead()) {
+				supported_features.add(MSConvertFeature.VENDOR_THERMO_RAW);
+			}
+			File masslynx_rdr = new File(root, "MassLynxRaw.dll");
+			if (masslynx_rdr.exists() && masslynx_rdr.canRead()) {
+				supported_features.add(MSConvertFeature.VENDOR_MASSLYNX_RAW);
+			}
+			// BUG TODO FIXME: tests for support of other vendors???
+		}
+	}
+
 	private String loadLocalTestFile(String msconvert_usage_file) {
 		StringWriter sw = new StringWriter();
 		BufferedReader rdr = null;
